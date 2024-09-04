@@ -4,63 +4,59 @@
 .org 0x00
 rjmp RESET  ;
 
-.org 0x02
 RESET:
     ; Configurar todos los pines del puerto B como salida
-    ldi r16, 0xFF   ;
+    ldi r16, 0b11111111   ;
     out DDRB, r16   ;
 
 main_loop:
     ; Encender LEDs en pares desde los extremos hacia el centro
-    ldi r16, 0x81   ;
-    out PORTB, r16
-    rcall delay_ms   ; Esperar un poco para visualizar el cambio
+    ldi r16, 0b00011000   ;
+    out PORTD, r16
+    rcall delay_long  ; Esperar un poco para visualizar el cambio
 
-    ldi r16, 0xC3   ;
-    out PORTB, r16
-    rcall delay_ms   ;
+    ldi r16, 0b00000000   ;
+    out PORTD, r16
+    rcall delay_long   ;
 
-    ldi r16, 0xE7   ; Encender LEDs en PB0, PB7, PB1, PB6, PB2 y PB5
-    out PORTB, r16
-    rcall delay_ms   ;
+    ldi r16, 0b00011000   ; Encender LEDs en PB0, PB7, PB1, PB6, PB2 y PB5
+    out PORTD, r16
+    rcall delay_long   ;
 
-    ldi r16, 0xFF   ;
-    out PORTB, r16
-    rcall delay_ms   ;
+    ldi r16, 0b00000000   ;
+    out PORTD, r16
+    rcall delay_long   ;
 
     ; Apagar LEDs en el mismo orden de afuera hacia adentro
-    ldi r16, 0xFF   ; Encender todos los LEDs
-    out PORTB, r16
-    rcall delay_ms   ;
+    ldi r16, 0b00000000   ; Encender todos los LEDs
+    out PORTD, r16
+    rcall delay_long   ;
 
-    ldi r16, 0xE7   ;
-    out PORTB, r16
-    rcall delay_ms   ;
+    ldi r16, 0b00011000   ;
+    out PORTD, r16
+    rcall delay_long  ;
 
-    ldi r16, 0xC3   ;
-    out PORTB, r16
-    rcall delay_ms   ;
+    ldi r16, 0b00111100   ;
+    out PORTD, r16
+    rcall delay_long   ;
 
-    ldi r16, 0x81   ;
-    out PORTB, r16
-    rcall delay_ms   ;
-
-    ;
-    ldi r16, 0x00   ;
-    out PORTB, r16
+    ldi r16, 0b01111110   ;
+    out PORTD, r16
+    rcall delay_long  ;
 
     ;
+    ldi r16, 0b11111111   ;
+    out PORTD, r16
+rcall delay_long
     rjmp main_loop  ;
 
 ;
-delay_ms:
-    ldi r18, 0xFF   ;
-delay_ms_1:
-    ldi r19, 0xFF   ;
-delay_ms_2:
-    dec r19         ;
-    brne delay_ms_2 ;
-    dec r18         ;
-    brne delay_ms_1 ;
-    ret             ;
+delay_loop:
+    dec r20         ; Decrementar r20
+    brne delay_loop ; Repetir hasta que r20 sea 0
+    dec r19         ; Decrementar r19
+    brne delay_loop ; Repetir hasta que r19 sea 0
+    dec r18         ; Decrementar r18
+    brne delay_loop ; Repetir hasta que r18 sea 0
+    ret             ; Regresar de la rutina
 
