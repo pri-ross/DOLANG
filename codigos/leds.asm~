@@ -6,16 +6,16 @@ rjmp RESET                ;
 .org 0x20                 ; 
 RESET:
     ldi r16, 0xFF         ; 
-    out DDRB, r16         ; 
+    out DDRD, r16         ; 
 
 main_loop:
     ldi r16, 0x01         ; 
-    out PORTB, r16        ; 
+    out PORTD, r16        ; 
     rcall delay           ; 
 
 shift_loop:
     lsl r16               ;
-    out PORTB, r16        ; 
+    out PORTD, r16        ; 
     rcall delay           ; 
     cpi r16, 0x00         ;
     brne shift_loop       ; 
