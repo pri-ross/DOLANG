@@ -5,21 +5,21 @@
 rjmp RESET  ;
 
 RESET:
-    ; Configurar todos los pines del puerto B como salida
+    ; 
     ldi r16, 0b11111111   ;
     out DDRB, r16   ;
 
 main_loop:
-    ; Encender LEDs en pares desde los extremos hacia el centro
+    ; 
     ldi r16, 0b00011000   ;
     out PORTD, r16
-    rcall delay_long  ; Esperar un poco para visualizar el cambio
+    rcall delay_long  ; 
 
     ldi r16, 0b00000000   ;
     out PORTD, r16
     rcall delay_long   ;
 
-    ldi r16, 0b00011000   ; Encender LEDs en PB0, PB7, PB1, PB6, PB2 y PB5
+    ldi r16, 0b00011000   ;
     out PORTD, r16
     rcall delay_long   ;
 
@@ -27,8 +27,8 @@ main_loop:
     out PORTD, r16
     rcall delay_long   ;
 
-    ; Apagar LEDs en el mismo orden de afuera hacia adentro
-    ldi r16, 0b00000000   ; Encender todos los LEDs
+    ; 
+    ldi r16, 0b00000000   ; 
     out PORTD, r16
     rcall delay_long   ;
 
