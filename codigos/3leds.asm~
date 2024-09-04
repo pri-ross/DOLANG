@@ -1,0 +1,66 @@
+
+.include "m328Pdef.inc"  ;
+
+.org 0x00
+rjmp RESET  ;
+
+.org 0x02
+RESET:
+    ; Configurar todos los pines del puerto B como salida
+    ldi r16, 0xFF   ;
+    out DDRB, r16   ;
+
+main_loop:
+    ; Encender LEDs en pares desde los extremos hacia el centro
+    ldi r16, 0x81   ;
+    out PORTB, r16
+    rcall delay_ms   ; Esperar un poco para visualizar el cambio
+
+    ldi r16, 0xC3   ;
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ldi r16, 0xE7   ; Encender LEDs en PB0, PB7, PB1, PB6, PB2 y PB5
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ldi r16, 0xFF   ;
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ; Apagar LEDs en el mismo orden de afuera hacia adentro
+    ldi r16, 0xFF   ; Encender todos los LEDs
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ldi r16, 0xE7   ;
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ldi r16, 0xC3   ;
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ldi r16, 0x81   ;
+    out PORTB, r16
+    rcall delay_ms   ;
+
+    ;
+    ldi r16, 0x00   ;
+    out PORTB, r16
+
+    ;
+    rjmp main_loop  ;
+
+;
+delay_ms:
+    ldi r18, 0xFF   ;
+delay_ms_1:
+    ldi r19, 0xFF   ;
+delay_ms_2:
+    dec r19         ;
+    brne delay_ms_2 ;
+    dec r18         ;
+    brne delay_ms_1 ;
+    ret             ;
+
