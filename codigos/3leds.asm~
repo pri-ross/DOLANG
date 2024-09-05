@@ -1,56 +1,59 @@
 
-.include "m328Pdef.inc"  ;
-
 .org 0x00
 rjmp RESET  ;
-
 RESET:
     ; 
-    ldi r16, 0b11111111   ;
-    out DDRB, r16   ;
+    ldi r16, 0xFF ; 
+    out DDRD, r16   ;
 
 main_loop:
-    ; 
-    ldi r16, 0b00011000   ;
+    ; Encender LEDs en pares desde los extremos hacia el centro
+    ldi r16, 0b01111110   ; Encender LEDs en PB0 y PB7
     out PORTD, r16
-    rcall delay_long  ; 
+    rcall delay_long ; 
 
-    ldi r16, 0b00000000   ;
+    ldi r16, 0b00111100   ; Encender LEDs en PB0, PB7, PB1 y PB6
     out PORTD, r16
-    rcall delay_long   ;
+    rcall delay_long ;
 
-    ldi r16, 0b00011000   ;
+    ldi r16, 0b00011000   ; Encender LEDs en PB0, PB7, PB1, PB6, PB2 y PB5
     out PORTD, r16
-    rcall delay_long   ;
+    rcall delay_long ;
 
-    ldi r16, 0b00000000   ;
+    ldi r16, 0x00   ; Encender todos los LEDs
     out PORTD, r16
-    rcall delay_long   ;
-
-    ; 
-    ldi r16, 0b00000000   ; 
-    out PORTD, r16
-    rcall delay_long   ;
-
-    ldi r16, 0b00011000   ;
-    out PORTD, r16
-    rcall delay_long  ;
-
-    ldi r16, 0b00111100   ;
-    out PORTD, r16
-    rcall delay_long   ;
-
-    ldi r16, 0b01111110   ;
-    out PORTD, r16
-    rcall delay_long  ;
+    rcall delay_long ; 
 
     ;
-    ldi r16, 0b11111111   ;
+    ldi r16, 0b00000000   ; Encender todos los LEDs
     out PORTD, r16
-rcall delay_long
+    rcall delay_long ; 
+
+    ldi r16, 0b00011000   ; Apagar LEDs en PB2 y PB5
+    out PORTD, r16
+    rcall delay_long ; 
+
+    ldi r16, 0b00111100   ; Apagar LEDs en PB1 y PB6
+    out PORTD, r16
+    rcall delay_long ;
+
+    ldi r16, 0b01111110   ; Apagar LEDs en PB0 y PB7
+    out PORTD, r16
+    rcall delay_long ; 
+
+    ;
+    ldi r16, 0xFF   ; Apagar todos los LEDs
+    out PORTD, r16
+    rcall delay_long
+    ;
     rjmp main_loop  ;
 
-;
+; Rutina de retardo 
+delay_long:
+    ldi r18, 80     ; 
+    ldi r19, 0xFF  ; 
+    ldi r20, 0xFF  ; 
+
 delay_loop:
     dec r20         ; Decrementar r20
     brne delay_loop ; Repetir hasta que r20 sea 0
@@ -58,5 +61,4 @@ delay_loop:
     brne delay_loop ; Repetir hasta que r19 sea 0
     dec r18         ; Decrementar r18
     brne delay_loop ; Repetir hasta que r18 sea 0
-    ret             ; Regresar de la rutina
-
+    ret             ; Regresar de la rutina
