@@ -1,36 +1,46 @@
-.include "m328pdef.inc"
 .CSEG
 .ORG 0x0000
-    RJMP RESET           ;
+    RJMP RESET        
 
 RESET:
-    LDI R16, 0xFF        ;
-    OUT DDRB, R16        ;
-    LDI R16, 0x00        ;
-    OUT PORTB, R16       ;
+    LDI R16, 0xFF        ; 
+    OUT DDRD, R16        ; 
+    LDI R16, 0xFF        ; 
+    OUT PORTD, R16       ;
 
-    LDI R17, 0x80        ;
+    LDI R17, 0x01        ; 
 
 LOOP:
-    OR R16, R17          ;
-    OUT PORTB, R16       ;
-    CALL DELAY           ;
-    LSR R17              ;
-    CPI R17, 0x00        ;
-    BRNE LOOP            ;
+    ; Apagar todos los LEDs
+    LDI R16, 0xFF        ;
+    OUT PORTD, R16       ; Apagar todos los LEDs
 
-    RJMP RESET           ;
+    ; Encender LEDs según el valor en R17 
+    EOR R16, R17         ; Encender el LED correspondiente 
+    OUT PORTD, R16       ; Actualizar el puerto con el nuevo valor de LEDs
+    CALL DELAY           ; 
+    LSL R17              ; Desplazar a la izquierda
+    CPI R17, 0x00        ; Comparar el registro R17 con 0
+    BRNE LOOP            ; 
 
-; Rutina de retardo
+    ; Cuando todos los LEDs estén encendidos, apagar todos los LEDs y reiniciar
+    LDI R16, 0xFF        ; Apagar todos los LEDs
+    OUT PORTD, R16       ; Actualizar el puerto para apagar todos los LEDs
+    CALL DELAY           ; 
+    LDI R17, 0x01        ; 
+
+    RJMP LOOP            ; 
+
 DELAY:
-    LDI R18, 0xFF        ;
-DELAY_LOOP1:
+    LDI R18, 80          ; 
     LDI R19, 0xFF        ;
-DELAY_LOOP2:
-    NOP                  ;
-    DEC R19              ;
-    BRNE DELAY_LOOP2     ;
-    DEC R18              ;
-    BRNE DELAY_LOOP1     ;
-    RET                  ;
+    LDI R20, 0xFF        ;
 
+DELAY_LOOP:
+    DEC R20              ; Decrementar R20
+    BRNE DELAY_LOOP      ; Repetir hasta que R20 sea 0
+    DEC R19              ; Decrementar R19
+    BRNE DELAY_LOOP      ; Repetir hasta que R19 sea 0
+    DEC R18              ; Decrementar R18
+    BRNE DELAY_LOOP      ; Repetir hasta que R18 sea 0
+    RET                  ; Regresar de la rutina
