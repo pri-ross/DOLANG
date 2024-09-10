@@ -1,0 +1,189 @@
+.org 0x0000
+    rjmp MAIN
+
+.org 0x0002
+    rjmp INTERRUPCION_INCREMENTAR
+
+.org 0x0004
+    rjmp INTERRUPCION_DECREMENTAR
+
+MAIN:
+    sei                     ; Habilita interrupciones globales
+
+    ; Configura puertos
+    ldi r16, 0x3F           ; Configura PB0-PB5 (pines digitales 8-13) como salida (segmentos A-F)
+    out DDRB, r16
+    ldi r16, (1<<PD7)       ; Configura PD7 (pin digital 7) como salida (segmento G)
+    out DDRD, r16
+	ldi r16, 0xFF
+	out DDRC, r16
+
+    ; Configura los botones en PD2 y PD3 como entradas con pull-up activado
+    cbi DDRD, 2             ; Configura PD2 (pin digital 2) como entrada
+    cbi DDRD, 3             ; Configura PD3 (pin digital 3) como entrada
+    sbi PORTD, 2            ; Activa pull-up en PD2
+    sbi PORTD, 3            ; Activa pull-up en PD3
+
+    ; Inicializa la pila
+    ldi r16, low(RAMEND)
+    out SPL, r16
+    ldi r16, high(RAMEND)
+    out SPH, r16
+
+    ; Configura interrupciones
+    ldi r18, (1<<INT0) | (1<<INT1) ; Habilita interrupciones INT0 e INT1
+    out EIMSK, r18
+    ldi r19, (1<<ISC01) | (1<<ISC00) ; Configura interrupciones por flancos de subida (INT0 y INT1)
+    sts EICRA, r19
+
+    ; Inicializa el contador en 0
+    ldi r20, 0
+    rcall MostrarNumero     ; Muestra el número inicial en el display
+
+    ; Bucle principal
+PRINCIPAL:
+    rcall ParpadeoLED 
+    rjmp PRINCIPAL          ; Bucle infinito, las interrupciones manejarán el contador
+
+; Rutina para mostrar el número en el display de 7 segmentos
+MostrarNumero:
+    ; Representación binaria de los números (ánodo común, valores invertidos)
+    ; 0bGFEDCBA
+    ;   G (segmento G)
+    ;   F
+    ;   E
+    ;   D
+    ;   C
+    ;   B
+    ;   A (segmento A)
+
+    ; Número 0: Todos los segmentos A, B, C, D, E, F apagados (inverso)
+    ldi r16, 0b11000000     ; Valor para 0 (A-F en 0, G en 1)
+    cpi r20, 0
+    breq actualizarDisplay
+
+    ; Número 1: Solo segmentos B y C apagados (inverso)
+    ldi r16, 0b11111001     ; Valor para 1 (B y C en 0, otros en 1)
+    cpi r20, 1
+    breq actualizarDisplay
+
+    ; Número 2: Segmentos A, B, D, E y G apagados (inverso)
+    ldi r16, 0b10100100     ; Valor para 2 (A, B, D, E, G en 0, C y F en 1)
+    cpi r20, 2
+    breq actualizarDisplay
+
+    ; Número 3: Segmentos A, B, C, D y G apagados (inverso)
+    ldi r16, 0b10110000     ; Valor para 3 (A, B, C, D, G en 0, E y F en 1)
+    cpi r20, 3
+    breq actualizarDisplay
+
+    ; Número 4: Segmentos B, C, F y G apagados (inverso)
+    ldi r16, 0b10011001     ; Valor para 4 (B, C, F, G en 0, A, D, E en 1)
+    cpi r20, 4
+    breq actualizarDisplay
+
+    ; Número 5: Segmentos A, C, D, F y G apagados (inverso)
+    ldi r16, 0b10010010     ; Valor para 5 (A, C, D, F, G en 0, B, E en 1)
+    cpi r20, 5
+    breq actualizarDisplay
+
+    ; Número 6: Segmentos A, C, D, E, F y G apagados (inverso)
+    ldi r16, 0b10000010     ; Valor para 6 (A, C, D, E, F, G en 0, B en 1)
+    cpi r20, 6
+    breq actualizarDisplay
+
+    ; Número 7: Segmentos A, B, C apagados (inverso)
+    ldi r16, 0b11111000     ; Valor para 7 (A, B, C en 0, otros en 1)
+    cpi r20, 7
+    breq actualizarDisplay
+
+    ; Número 8: Todos los segmentos apagados (inverso)
+    ldi r16, 0b10000000     ; Valor para 8 (Todos en 0)
+    cpi r20, 8
+    breq actualizarDisplay
+
+    ; Número 9: Segmentos A, B, C, D, F, G apagados (inverso)
+    ldi r16, 0b10010000     ; Valor para 9 (A, B, C, D, F, G en 0, E en 1)
+
+actualizarDisplay:
+    out PORTB, r16          ; Envía los valores para los segmentos A-F
+
+    ; Control del segmento G
+    cpi r20, 1
+    breq apagarG            ; Apaga G para el número 1
+    cpi r20, 7
+    breq apagarG            ; Apaga G para el número 7
+    sbi PORTD, 7            ; Enciende G para los demás números
+    cpi r20, 0
+    breq apagarG            ; Apaga G para el número 0
+
+    cbi PORTD, 7            ; Apaga el segmento G
+    ret
+
+apagarG:
+    sbi PORTD, 7            ; Enciende el segmento G
+    ret
+
+; Rutina de interrupción INT0 (incrementar)
+INTERRUPCION_INCREMENTAR:
+    inc r20                 ; Incrementa el valor en r20
+    cpi r20, 10             ; Compara con 10 (número máximo para el display)
+    brge cero               ; Si es mayor o igual a 10, restablece a 0
+    rcall MostrarNumero     ; Muestra el número en el display
+    rcall delay             ; Añade un retardo para que no se salten números
+    reti
+
+cero:
+    ldi r20, 0              ; Restablece a 0
+    rcall MostrarNumero     ; Muestra el número en el display
+    rcall delay             ; Añade un retardo
+    reti
+
+; Rutina de interrupción INT1 (decrementar)
+INTERRUPCION_DECREMENTAR:
+    dec r20                 ; Decrementa el valor en r20
+    cpi r20, -1             ; Compara con -1 (número mínimo para el display)
+    brlt nueve              ; Si es menor que 0, ajusta a 9
+    rcall MostrarNumero     ; Muestra el número en el display
+    rcall delay             ; Añade un retardo para que no se salten números
+    reti
+
+nueve:
+    ldi r20, 9              ; Ajusta a 9
+    rcall MostrarNumero     ; Muestra el número en el display
+    rcall delay             ; Añade un retardo
+    reti
+
+delay:
+    ldi r18, 0xFF
+loop1:
+    dec r18
+    brne loop1
+    ldi r19, 0xFF
+loop2:
+    dec r19
+    brne loop2
+    ret
+
+; Rutina de parpadeo del LED azul
+ParpadeoLED:
+    sbi PORTC, PC0
+    rcall Mseg        
+    cbi PORTC, PC0
+    rcall Mseg       
+    ret
+
+; Rutina de retardo de 500 ms
+Mseg:
+    ldi r21, 21
+    ldi r22, 75
+    ldi r23, 189
+
+L1:    
+    dec r23
+    brne L1
+    dec r22
+    brne L1
+    dec r21
+    brne L1
+    ret
