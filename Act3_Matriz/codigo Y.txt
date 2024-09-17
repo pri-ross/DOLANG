@@ -1,0 +1,94 @@
+.org 0x00
+
+; Inicialización
+ldi r20 , 0b11110011
+out DDRD,r20
+ldi r20, 0xFF
+out DDRB,r20
+ldi r20, 0xFF
+out DDRC, r20
+
+
+main_loop:
+; linea 1 
+    ldi r20,0x00
+	out PORTB,r20
+	ldi r20, 0b11111100
+	out PORTC, r20
+	ldi r20, 0b11111100
+    out PORTD,r20 
+    rcall deley
+
+; linea 2
+    ldi r20,0x01
+	out PORTB,r20
+	ldi r20, 0b11111100
+	out PORTC, r20
+	ldi r20, 0b11111100
+    out PORTD,r20 
+    rcall deley
+
+; linea 3
+    ldi r20,0x02
+	out PORTB,r20
+	ldi r20, 0b11111100
+	out PORTC, r20
+	ldi r20, 0b11111100
+    out PORTD,r20 
+    rcall deley
+; linea 4
+    ldi r20,0x03
+	out PORTB,r20
+	ldi r20, 0x00
+	out PORTC, r20
+	ldi r20, 0x00
+    out PORTD,r20 
+    rcall deley
+; linea 5
+    ldi r20,0x04
+	out PORTB,r20
+	ldi r20, 0x00
+	out PORTC, r20
+	ldi r20, 0x00
+    out PORTD,r20 
+    rcall deley
+; linea 6
+    ldi r20,0x05
+	out PORTB,r20
+	ldi r20, 0b11111111
+	out PORTC, r20
+	ldi r20, 0b11000011
+    out PORTD,r20 
+    rcall deley
+; linea 7
+    ldi r20,0x06
+	out PORTB,r20
+	ldi r20, 0b11111100
+	out PORTC, r20
+	ldi r20, 0b11111100
+    out PORTD,r20 
+    rcall deley
+; linea 8
+    ldi r20,0x07
+	out PORTB,r20
+	ldi r20, 0b11111100
+	out PORTC, r20
+	ldi r20, 0b11111100
+    out PORTD,r20 
+    rcall deley
+
+    rjmp main_loop
+
+
+deley:
+    ldi r20, 10
+	ldi r19, 10
+   
+   
+L1:
+    dec r19
+	brne L1
+    
+    dec r20
+    brne L1
+    ret
