@@ -56,6 +56,7 @@ LUT:
 	ldi r28, 0x00
 	ldi r29, 0x01
 
+
 	ldi r20, 0x80       ; Valor 0
     ST Y+, r20
     ldi r20, 0x83       ; Valor 1
@@ -318,9 +319,9 @@ LUT:
     ST Y+, r20
     ldi r20, 0xa5    
 	ST Y+, r20
-	ldi r20,   0xa5    ; Valor 124
+	ldi r20,   0xa5   
     ST Y+, r20
-    ldi r20, 0xa2       ; Valor 125
+    ldi r20, 0xa2       
     ST Y+, r20
 	ldi r20, 0x9f   
     ST Y+, r20
@@ -332,9 +333,9 @@ LUT:
     ST Y+, r20
     ldi r20,  0x92  
 	ST Y+, r20
-	ldi r20,  0x8f   ; Valor 124
+	ldi r20,  0x8f   
     ST Y+, r20
-    ldi r20, 0x8c       ; Valor 125
+    ldi r20, 0x8c       
     ST Y+, r20
 	ldi r20, 0x89 
     ST Y+, r20
@@ -345,252 +346,252 @@ LUT:
     ldi r20, 0x80  ;   
     ST Y+, r20
     ldi r20, 0x7c 
-ldi r20, 0x79       ; Valor 0
+ldi r20, 0x79     
     ST Y+, r20
-    ldi r20, 0x76       ; Valor 1
+    ldi r20, 0x76       
     ST Y+, r20
-    ldi r20, 0x73       ; Valor 2
+    ldi r20, 0x73       
     ST Y+, r20
-    ldi r20, 0x70       ; Valor 3
+    ldi r20, 0x70       
     ST Y+, r20
-    ldi r20, 0x6d       ; Valor 4
+    ldi r20, 0x6d      
     ST Y+, r20
-    ldi r20, 0x6a       ; Valor 5
+    ldi r20, 0x6a       
     ST Y+, r20
-    ldi r20, 0x67       ; Valor 6
+    ldi r20, 0x67       
     ST Y+, r20
-    ldi r20, 0x63       ; Valor 7
+    ldi r20, 0x63      
     ST Y+, r20
-    ldi r20, 0x60       ; Valor 8
+    ldi r20, 0x60       
     ST Y+, r20
-    ldi r20, 0x5d       ; Valor 9
+    ldi r20, 0x5d      
     ST Y+, r20
-    ldi r20, 0x5a       ; Valor 10
+    ldi r20, 0x5a       
     ST Y+, r20
-    ldi r20, 0x57       ; Valor 11
+    ldi r20, 0x57       
     ST Y+, r20
-    ldi r20, 0x54       ; Valor 12
+    ldi r20, 0x54      
     ST Y+, r20
-    ldi r20, 0x51       ; Valor 13
+    ldi r20, 0x51      
     ST Y+, r20
-    ldi r20, 0x4f       ; Valor 14
+    ldi r20, 0x4f       
     ST Y+, r20
-    ldi r20, 0x4c       ; Valor 15
+    ldi r20, 0x4c      
     ST Y+, r20
-    ldi r20, 0x49       ; Valor 16
+    ldi r20, 0x49       
     ST Y+, r20
-    ldi r20, 0x46       ; Valor 17
+    ldi r20, 0x46     
     ST Y+, r20
-    ldi r20, 0x43       ; Valor 18
+    ldi r20, 0x43       
     ST Y+, r20
-    ldi r20, 0x40       ; Valor 19
+    ldi r20, 0x40      
     ST Y+, r20
-    ldi r20, 0x3e       ; Valor 20
+    ldi r20, 0x3e       
     ST Y+, r20
-    ldi r20, 0x3b       ; Valor 21
+    ldi r20, 0x3b     
     ST Y+, r20
-    ldi r20, 0x38       ; Valor 22
+    ldi r20, 0x38      
     ST Y+, r20
-    ldi r20, 0x36       ; Valor 23
+    ldi r20, 0x36      
     ST Y+, r20
-    ldi r20, 0x33       ; Valor 24
+    ldi r20, 0x33      
     ST Y+, r20
-    ldi r20, 0x31       ; Valor 25
+    ldi r20, 0x31     
     ST Y+, r20
-    ldi r20, 0x2e       ; Valor 26
+    ldi r20, 0x2e     
     ST Y+, r20
-    ldi r20, 0x2c       ; Valor 27
+    ldi r20, 0x2c      
     ST Y+, r20
-    ldi r20, 0x2a       ; Valor 28
+    ldi r20, 0x2a      
     ST Y+, r20
-    ldi r20, 0x27       ; Valor 29
+    ldi r20, 0x27       
     ST Y+, r20
-    ldi r20, 0x25       ; Valor 30
+    ldi r20, 0x25       
     ST Y+, r20
-    ldi r20, 0x23       ; Valor 31
+    ldi r20, 0x23      
     ST Y+, r20
-    ldi r20, 0x21       ; Valor 32
+    ldi r20, 0x21       
     ST Y+, r20
-    ldi r20, 0x1f       ; Valor 33
+    ldi r20, 0x1f      
     ST Y+, r20
-    ldi r20, 0x1d       ; Valor 34
+    ldi r20, 0x1d     
     ST Y+, r20
-    ldi r20, 0x1b       ; Valor 35
+    ldi r20, 0x1b      
     ST Y+, r20
-    ldi r20, 0x19       ; Valor 36
+    ldi r20, 0x19      
     ST Y+, r20
-    ldi r20, 0x17       ; Valor 37
+    ldi r20, 0x17    
     ST Y+, r20
-    ldi r20, 0x15       ; Valor 38
+    ldi r20, 0x15       
     ST Y+, r20
-    ldi r20, 0x13       ; Valor 39
+    ldi r20, 0x13      
     ST Y+, r20
-    ldi r20, 0x12       ; Valor 40
+    ldi r20, 0x12   
     ST Y+, r20
-    ldi r20, 0x10       ; Valor 41
+    ldi r20, 0x10      
     ST Y+, r20
-    ldi r20, 0x0f       ; Valor 42
+    ldi r20, 0x0f       
     ST Y+, r20
-    ldi r20, 0x0d       ; Valor 43
+    ldi r20, 0x0d      
     ST Y+, r20
-    ldi r20, 0x0c       ; Valor 44
+    ldi r20, 0x0c      
     ST Y+, r20
-    ldi r20, 0x0a       ; Valor 45
+    ldi r20, 0x0a      
     ST Y+, r20
-    ldi r20, 0x09       ; Valor 46
+    ldi r20, 0x09       
     ST Y+, r20
-    ldi r20, 0x08       ; Valor 47
+    ldi r20, 0x08      
     ST Y+, r20
-    ldi r20, 0x07       ; Valor 48
+    ldi r20, 0x07      
     ST Y+, r20
-    ldi r20, 0x06       ; Valor 49
+    ldi r20, 0x06   
     ST Y+, r20
-    ldi r20, 0x05       ; Valor 50
+    ldi r20, 0x05     
     ST Y+, r20
-    ldi r20, 0x04       ; Valor 51
+    ldi r20, 0x04    
     ST Y+, r20
-    ldi r20, 0x03       ; Valor 52
+    ldi r20, 0x03   
     ST Y+, r20
-    ldi r20, 0x03       ; Valor 53
+    ldi r20, 0x03      
     ST Y+, r20
-    ldi r20, 0x02       ; Valor 54
+    ldi r20, 0x02       
     ST Y+, r20
-    ldi r20, 0x01       ; Valor 55
+    ldi r20, 0x01       
     ST Y+, r20
-    ldi r20, 0x01       ; Valor 56
+    ldi r20, 0x01      
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 57
+    ldi r20, 0x00     
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 58
+    ldi r20, 0x00      
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 59
+    ldi r20, 0x00       
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 60
+    ldi r20, 0x00       
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 61
+    ldi r20, 0x00      
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 62
+    ldi r20, 0x00      
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 63
+    ldi r20, 0x00       
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 64
+    ldi r20, 0x00      
     ST Y+, r20
-    ldi r20, 0x00       ; Valor 65
+    ldi r20, 0x00       
     ST Y+, r20
-    ldi r20, 0x01       ; Valor 66
+    ldi r20, 0x01      
     ST Y+, r20
-    ldi r20, 0x01       ; Valor 67
+    ldi r20, 0x01      
     ST Y+, r20
-    ldi r20, 0x02       ; Valor 68
+    ldi r20, 0x02     
     ST Y+, r20
-    ldi r20, 0x03       ; Valor 69
+    ldi r20, 0x03       
     ST Y+, r20
-    ldi r20, 0x03       ; Valor 70
+    ldi r20, 0x03      
     ST Y+, r20
-    ldi r20, 0x04       ; Valor 71
+    ldi r20, 0x04       
     ST Y+, r20
-    ldi r20, 0x05       ; Valor 72
+    ldi r20, 0x05      
     ST Y+, r20
-    ldi r20, 0x06       ; Valor 73
+    ldi r20, 0x06     
     ST Y+, r20
-    ldi r20, 0x07       ; Valor 74
+    ldi r20, 0x07      
     ST Y+, r20
-    ldi r20, 0x08       ; Valor 75
+    ldi r20, 0x08      
     ST Y+, r20
-    ldi r20, 0x09       ; Valor 76
+    ldi r20, 0x09       
     ST Y+, r20
-    ldi r20, 0x0a       ; Valor 77
+    ldi r20, 0x0a      
     ST Y+, r20
-    ldi r20, 0x0c       ; Valor 78
+    ldi r20, 0x0c       
     ST Y+, r20
-    ldi r20, 0x0d       ; Valor 79
+    ldi r20, 0x0d      
     ST Y+, r20
-    ldi r20, 0x0f       ; Valor 80
+    ldi r20, 0x0f       
     ST Y+, r20
-    ldi r20, 0x10       ; Valor 81
+    ldi r20, 0x10       
     ST Y+, r20
-    ldi r20, 0x12       ; Valor 82
+    ldi r20, 0x12      
     ST Y+, r20
-    ldi r20, 0x13       ; Valor 83
+    ldi r20, 0x13       
     ST Y+, r20
-    ldi r20, 0x15       ; Valor 
-	ldi r20, 0x17       ; Valor 0
+    ldi r20, 0x15      
+	ldi r20, 0x17      
     ST Y+, r20
-    ldi r20, 0x19       ; Valor 1
+    ldi r20, 0x19     
     ST Y+, r20
-    ldi r20, 0x1b       ; Valor 2
+    ldi r20, 0x1b      
     ST Y+, r20
-    ldi r20, 0x1d       ; Valor 3
+    ldi r20, 0x1d       
     ST Y+, r20
-    ldi r20, 0x1f       ; Valor 4
+    ldi r20, 0x1f       
     ST Y+, r20
-    ldi r20, 0x21       ; Valor 5
+    ldi r20, 0x21       
     ST Y+, r20
-    ldi r20, 0x23       ; Valor 6
+    ldi r20, 0x23   
     ST Y+, r20
-    ldi r20, 0x25       ; Valor 7
+    ldi r20, 0x25       
     ST Y+, r20
-    ldi r20, 0x27       ; Valor 8
+    ldi r20, 0x27       
     ST Y+, r20
-    ldi r20, 0x2a       ; Valor 9
+    ldi r20, 0x2a     
     ST Y+, r20
-    ldi r20, 0x2c       ; Valor 10
+    ldi r20, 0x2c      
     ST Y+, r20
-    ldi r20, 0x2e       ; Valor 11
+    ldi r20, 0x2e      
     ST Y+, r20
-    ldi r20, 0x31       ; Valor 12
+    ldi r20, 0x31      
     ST Y+, r20
-    ldi r20, 0x33       ; Valor 13
+    ldi r20, 0x33       
     ST Y+, r20
-    ldi r20, 0x36       ; Valor 14
+    ldi r20, 0x36      
     ST Y+, r20
-    ldi r20, 0x38       ; Valor 15
+    ldi r20, 0x38       
     ST Y+, r20
-    ldi r20, 0x3b       ; Valor 16
+    ldi r20, 0x3b       
     ST Y+, r20
-    ldi r20, 0x3e       ; Valor 17
+    ldi r20, 0x3e      
     ST Y+, r20
-    ldi r20, 0x40       ; Valor 18
+    ldi r20, 0x40    
     ST Y+, r20
-    ldi r20, 0x43       ; Valor 19
+    ldi r20, 0x43      
     ST Y+, r20
-    ldi r20, 0x46       ; Valor 20
+    ldi r20, 0x46      
     ST Y+, r20
-    ldi r20, 0x49       ; Valor 21
+    ldi r20, 0x49     
     ST Y+, r20
-    ldi r20, 0x4c       ; Valor 22
+    ldi r20, 0x4c     
     ST Y+, r20
-    ldi r20, 0x4f       ; Valor 23
+    ldi r20, 0x4f     
     ST Y+, r20
-    ldi r20, 0x51       ; Valor 24
+    ldi r20, 0x51      
     ST Y+, r20
-    ldi r20, 0x54       ; Valor 25
+    ldi r20, 0x54       
     ST Y+, r20
-    ldi r20, 0x57       ; Valor 26
+    ldi r20, 0x57      
     ST Y+, r20
-    ldi r20, 0x5a       ; Valor 27
+    ldi r20, 0x5a       
     ST Y+, r20
-    ldi r20, 0x5d       ; Valor 28
+    ldi r20, 0x5d     
     ST Y+, r20
-    ldi r20, 0x60       ; Valor 29
+    ldi r20, 0x60      
     ST Y+, r20
-    ldi r20, 0x63       ; Valor 30
+    ldi r20, 0x63      
     ST Y+, r20
-    ldi r20, 0x67       ; Valor 31
+    ldi r20, 0x67     
     ST Y+, r20
-    ldi r20, 0x6a       ; Valor 32
+    ldi r20, 0x6a      
     ST Y+, r20
-    ldi r20, 0x6d       ; Valor 33
+    ldi r20, 0x6d      
     ST Y+, r20
-    ldi r20, 0x70       ; Valor 34
+    ldi r20, 0x70       
     ST Y+, r20
-    ldi r20, 0x73       ; Valor 35
+    ldi r20, 0x73       
     ST Y+, r20
-    ldi r20, 0x76       ; Valor 36
+    ldi r20, 0x76       
     ST Y+, r20
-    ldi r20, 0x79       ; Valor 37
+    ldi r20, 0x79       
     ST Y+, r20
-    ldi r20, 0x7c       ; Valor 38
+    ldi r20, 0x7c      
     ST Y+, r20
 
 
