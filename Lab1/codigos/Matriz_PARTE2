@@ -1,1 +1,1339 @@
+.org 0x00
 
+ldi r20, 0xFF      
+out DDRD, r20      
+out DDRB, r20      
+ldi r16, high (ramend)
+out sph, r16
+ldi r16, low (ramend)
+out spl, r16
+
+ldi r16, 0 
+sts TCCR1A, r16 
+ldi r16, (1<<CS12)
+
+sts TCCR1B, r16
+ldi r16, 0 
+sts TCCR1C, r16
+ldi r16, 0 
+
+sts TIMSK1, r16 
+ldi r16, high(3036)
+sts TCNT1H,  r16
+ldi r16, low (3036)
+sts TCNT1L, r16
+
+
+main_loop:
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer 
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+    call mostrar_H
+	call mostrar_H
+	call mostrar_H
+	call mostrar_H
+	call mostrar_H
+	
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+    call mostrar_A
+	call mostrar_A
+	call mostrar_A
+	call mostrar_A
+	call mostrar_A
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+    call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+	
+	call mostrar_Y
+	call mostrar_Y
+	call mostrar_Y
+	call mostrar_Y
+	call mostrar_Y
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer 
+	call timmer
+
+	call mostrar_W
+	call mostrar_W
+	call mostrar_W
+	call mostrar_W
+	call mostrar_W
+	ldi r16, 0xFF 
+	out portd, r16
+
+    call timmer
+	call timmer
+
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E	
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_K
+	call mostrar_K
+	call mostrar_K
+	call mostrar_K
+	call mostrar_K	
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+
+	ldi r16, 0xFF 
+	out portd, r16
+	
+	call timmer
+	call timmer
+
+	call mostrar_N
+	call mostrar_N
+	call mostrar_N
+	call mostrar_N
+	call mostrar_N
+	
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_D
+	call mostrar_D
+	call mostrar_D
+	call mostrar_D
+	call mostrar_D
+	
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+	call timmer
+ 
+    rjmp main_loop   
+
+mostrar_H:
+    
+	ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+    ret
+
+
+mostrar_A:
+    
+	ldi r16, 0x00
+    ldi r17, 0b11000011  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b10000001  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+    ret
+
+
+mostrar_P:
+    
+	ldi r16, 0x00
+    ldi r17, 0b10000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b10000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+    ret
+
+mostrar_Y: 
+    
+	ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b10011001 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b11000011  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11100111 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b11100111  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b11100111  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_W:
+  
+    ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00100100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00011000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100 ; Fila 8 de "W"
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_E: 
+
+    ldi r16, 0x00
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_K:
+
+    ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b10011100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b11001100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11001100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b10011100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_N:
+
+    ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00110000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00100100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00001100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00011100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+	ret
+
+mostrar_D:
+   
+    ldi r16, 0x00
+    ldi r17, 0b11000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b10000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00011100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00011100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b10000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b11000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+timmer: 
+
+	sbis TIFR1, TOV1
+	rjmp timmer 
+	sbi TIFR1, TOV1
+	ldi r16, high(34286)
+	sts TCNT1H, r16
+	ldi r16, low(34286)
+	sts TCNT1L, r16
+	ret
+
+deley:
+
+    ldi r20, 60
+    ldi r19, 70
+
+L1:
+
+    dec r19
+    brne L1  
+    dec r20
+    brne L1
+    ret.org 0x00
+
+ldi r20, 0xFF      
+out DDRD, r20      
+out DDRB, r20      
+ldi r16, high (ramend)
+out sph, r16
+ldi r16, low (ramend)
+out spl, r16
+
+ldi r16, 0 
+sts TCCR1A, r16 
+ldi r16, (1<<CS12)
+
+sts TCCR1B, r16
+ldi r16, 0 
+sts TCCR1C, r16
+ldi r16, 0 
+
+sts TIMSK1, r16 
+ldi r16, high(3036)
+sts TCNT1H,  r16
+ldi r16, low (3036)
+sts TCNT1L, r16
+
+
+main_loop:
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer 
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+    call mostrar_H
+	call mostrar_H
+	call mostrar_H
+	call mostrar_H
+	call mostrar_H
+	
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+    call mostrar_A
+	call mostrar_A
+	call mostrar_A
+	call mostrar_A
+	call mostrar_A
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+    call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	call mostrar_P
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+	
+	call mostrar_Y
+	call mostrar_Y
+	call mostrar_Y
+	call mostrar_Y
+	call mostrar_Y
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer 
+	call timmer
+
+	call mostrar_W
+	call mostrar_W
+	call mostrar_W
+	call mostrar_W
+	call mostrar_W
+	ldi r16, 0xFF 
+	out portd, r16
+
+    call timmer
+	call timmer
+
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E	
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_K
+	call mostrar_K
+	call mostrar_K
+	call mostrar_K
+	call mostrar_K	
+
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+	call mostrar_E
+
+	ldi r16, 0xFF 
+	out portd, r16
+	
+	call timmer
+	call timmer
+
+	call mostrar_N
+	call mostrar_N
+	call mostrar_N
+	call mostrar_N
+	call mostrar_N
+	
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+
+	call mostrar_D
+	call mostrar_D
+	call mostrar_D
+	call mostrar_D
+	call mostrar_D
+	
+	ldi r16, 0xFF 
+	out portd, r16
+
+	call timmer
+	call timmer
+	call timmer
+ 
+    rjmp main_loop   
+
+mostrar_H:
+    
+	ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+    ret
+
+
+mostrar_A:
+    
+	ldi r16, 0x00
+    ldi r17, 0b11000011  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b10000001  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+    ret
+
+
+mostrar_P:
+    
+	ldi r16, 0x00
+    ldi r17, 0b10000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b10000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+    ret
+
+mostrar_Y: 
+    
+	ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b10011001 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b11000011  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11100111 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b11100111  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b11100111  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_W:
+  
+    ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00111100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00100100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00011000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100 ; Fila 8 de "W"
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_E: 
+
+    ldi r16, 0x00
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_K:
+
+    ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b10011100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b11001100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b11100000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b11001100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b10011100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+mostrar_N:
+
+    ldi r16, 0x00
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b00111000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00110000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00100100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00001100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00011100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+	ret
+
+mostrar_D:
+   
+    ldi r16, 0x00
+    ldi r17, 0b11000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x01
+    ldi r17, 0b10000000 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x02
+    ldi r17, 0b00011100 
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x03
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x04
+    ldi r17, 0b00111100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x05
+    ldi r17, 0b00011100  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x06
+    ldi r17, 0b10000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+
+    ldi r16, 0x07
+    ldi r17, 0b11000000  
+    out PORTB, r16
+    out PORTD, r17
+    rcall deley
+	
+	ret
+
+timmer: 
+
+	sbis TIFR1, TOV1
+	rjmp timmer 
+	sbi TIFR1, TOV1
+	ldi r16, high(34286)
+	sts TCNT1H, r16
+	ldi r16, low(34286)
+	sts TCNT1L, r16
+	ret
+
+deley:
+
+    ldi r20, 60
+    ldi r19, 70
+
+L1:
+
+    dec r19
+    brne L1  
+    dec r20
+    brne L1
+    ret
