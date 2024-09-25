@@ -1,0 +1,574 @@
+.include "m328pdef.inc"
+ .org 0x0000
+rjmp inicio
+
+inicio:
+    ldi r16, high(ramend)
+    out sph, r16
+    ldi r16, low(ramend)
+    out spl, r16
+
+    ; Configuración de puertos
+    ldi r16, 0b11111111
+    out DDRD, r16
+    cbi PORTD, 0
+
+    ldi r16, 0
+    sts UBRR0H, r16
+    ldi r16, 103
+    sts UBRR0L, r16
+    ldi r16, (1 << RXEN0) | (1 << TXEN0)
+    sts UCSR0B, r16
+    ldi r16, (1 << UCSZ01) | (1 << UCSZ00)
+    sts UCSR0C, r16
+
+
+    sbi PORTD, PD0
+
+    ; Mensaje de inicialización
+    ldi r16, 'L'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'v'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ':'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+    ldi r16, 'E'
+    rcall enviar_usart
+    ldi r16, 's'
+    rcall enviar_usart
+    ldi r16, 't'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'b'
+    rcall enviar_usart
+    ldi r16, 'l'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'c'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'm'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 't'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, '.'
+    rcall enviar_usart
+    ldi r16, 10
+    rcall enviar_usart
+
+espera_comando:
+    ; Espera un comando de carga 'l', 'm', 'c' y luego 'a' para iniciar
+    rcall recibir_usart
+    cpi r16, 'l'
+    rjmp carga_liviana
+    cpi r16, 'L'
+    rjmp carga_liviana
+    cpi r16, 'm'
+    rjmp carga_mediana
+    cpi r16, 'M'
+    rjmp carga_mediana
+    cpi r16, 'c'
+    rjmp carga_completa
+    cpi r16, 'C'
+    rjmp carga_completa
+    cpi r16, 'a'
+    rjmp empezar_lavado
+    cpi r16, 'A'
+    rjmp empezar_lavado
+    rjmp espera_comando
+
+carga_liviana:
+    ldi r17, 1
+    sbi PORTD, PD5
+    rjmp espera_comando
+
+carga_mediana:
+    ldi r17, 2
+    sbi PORTD, PD6
+    rjmp espera_comando
+
+carga_completa:
+    ldi r17, 3
+    sbi PORTD, PD7
+    rjmp espera_comando
+
+empezar_lavado:
+
+    cpi r17, 1
+    rjmp liviano
+    cpi r17, 2
+    rjmp mediano
+    cpi r17, 3
+    rjmp completo
+    rjmp espera_comando
+
+liviano:
+    ldi r16, 'L'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'v'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+
+
+    sbi PORTD, PD1
+    ldi r17, 5
+ciclo_lavado_liviano:
+    sbi PORTD, PD5
+    ldi r18, 2
+    call retardo_varios
+    cbi PORTD, PD5
+    ldi r18, 1
+    call retardo_varios
+    dec r17
+    brne ciclo_lavado_liviano
+
+    cbi PORTD, PD1
+    rjmp centrifugar_liviano
+
+centrifugar_liviano:
+    sbi PORTD, PD2
+    ldi r16, 'C'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 't'
+    rcall enviar_usart
+    ldi r16, 'r'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'f'
+    rcall enviar_usart
+    ldi r16, 'u'
+    rcall enviar_usart
+    ldi r16, 'g'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+
+
+    ldi r18, 15
+    call retardo_varios
+    cbi PORTD, PD2
+    rjmp secar_liviano
+
+secar_liviano:
+    sbi PORTD, PD3
+    ldi r16, 'S'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'c'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+
+
+
+
+    sbi PORTD, PD5
+    ldi r18, 5
+    call retardo_varios
+    cbi PORTD, PD5
+    ldi r18, 3
+    call retardo_varios
+
+
+
+    sbi PORTD, PD6
+    ldi r18, 5
+    call retardo_varios
+    cbi PORTD, PD6
+    cbi PORTD, PD3
+    ldi r16, 'F'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'l'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'z'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, '.'
+    rcall enviar_usart
+    ldi r16, 10
+    rcall enviar_usart
+
+    cbi PORTD, PD4
+    rjmp volver
+
+mediano:
+
+    ldi r16, 'M'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+
+    ; Inicia el lavado
+    sbi PORTD, PD1
+    ldi r17, 5
+ciclo_lavado_mediano:
+    sbi PORTD, PD5
+    ldi r18, 3
+    call retardo_varios
+    cbi PORTD, PD5
+    ldi r18, 2
+    call retardo_varios
+    dec r17
+    brne ciclo_lavado_mediano
+
+    cbi PORTD, PD1
+    rjmp centrifugar_mediano
+
+centrifugar_mediano:
+    sbi PORTD, PD2
+    ldi r16, 'C'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 't'
+    rcall enviar_usart
+    ldi r16, 'r'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'f'
+    rcall enviar_usart
+    ldi r16, 'u'
+    rcall enviar_usart
+    ldi r16, 'g'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+    ldi r18, 18
+    call retardo_varios
+    cbi PORTD, PD2
+    rjmp secar_mediano
+
+secar_mediano:
+    sbi PORTD, PD3
+    ldi r16, 'S'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'c'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+
+
+    sbi PORTD, PD5
+    ldi r18, 5
+    call retardo_varios
+    cbi PORTD, PD5
+    ldi r18, 3
+    call retardo_varios
+
+
+    sbi PORTD, PD6
+    ldi r18, 5
+    call retardo_varios
+    cbi PORTD, PD6
+    cbi PORTD, PD3
+    ldi r16, 'F'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'l'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'z'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, '.'
+    rcall enviar_usart
+    ldi r16, 10
+    rcall enviar_usart
+
+    cbi PORTD, PD4
+    rjmp volver
+
+
+completo:
+    ldi r16, 'C'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, 'm'
+    rcall enviar_usart
+    ldi r16, 'p'
+    rcall enviar_usart
+    ldi r16, 'l'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 't'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+
+    sbi PORTD, PD1
+    ldi r17, 5
+ciclo_lavado_completo:
+    sbi PORTD, PD5
+    ldi r18, 4
+    call retardo_varios
+    cbi PORTD, PD5
+    ldi r18, 2
+    call retardo_varios
+    dec r17
+    brne ciclo_lavado_completo
+
+    cbi PORTD, PD1
+    rjmp centrifugar_completo
+
+centrifugar_completo:
+    sbi PORTD, PD2
+    ldi r16, 'C'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 't'
+    rcall enviar_usart
+    ldi r16, 'r'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'f'
+    rcall enviar_usart
+    ldi r16, 'u'
+    rcall enviar_usart
+    ldi r16, 'g'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+
+
+    ldi r18, 21
+    call retardo_varios
+    cbi PORTD, PD2
+    rjmp secar_completo
+
+secar_completo:
+    sbi PORTD, PD3
+    ldi r16, 'S'
+    rcall enviar_usart
+    ldi r16, 'e'
+    rcall enviar_usart
+    ldi r16, 'c'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, ' '
+    rcall enviar_usart
+
+
+    ; Girar a la derecha (puente H)
+    sbi PORTD, PD5
+    ldi r18, 5
+    call retardo_varios
+    cbi PORTD, PD5
+    ldi r18, 3
+    call retardo_varios
+
+    ; Girar a la izquierda (puente H)
+    sbi PORTD, PD6
+    ldi r18, 5
+    call retardo_varios
+    cbi PORTD, PD6
+    cbi PORTD, PD3
+    ldi r16, 'F'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'n'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'l'
+    rcall enviar_usart
+    ldi r16, 'i'
+    rcall enviar_usart
+    ldi r16, 'z'
+    rcall enviar_usart
+    ldi r16, 'a'
+    rcall enviar_usart
+    ldi r16, 'd'
+    rcall enviar_usart
+    ldi r16, 'o'
+    rcall enviar_usart
+    ldi r16, 10
+    rcall enviar_usart
+
+    cbi PORTD, PD4
+    rjmp volver
+
+volver:
+    cbi PORTD, PD1
+    cbi PORTD, PD2
+    cbi PORTD, PD3
+    cbi PORTD, PD4
+    cbi PORTD, PD5
+    cbi PORTD, PD6
+    cbi PORTD, PD7
+    rjmp espera_comando
+
+
+enviar_usart:
+
+  lds r17, UCSR0A
+  sbrs r17, UDRE0
+
+    ret
+    sts UDR0, r16
+
+    ret
+
+
+recibir_usart:
+lds r17, UCSR0A
+sbrs r17, UDRE0
+ret
+sts UDR0, r16
+
+lds r17, UCSR0A
+sbrs r17, RXC0
+rjmp recibir_usart
+lds r16, UDR0
+ret
+
+
+retardo_varios:
+    ldi r19, 0
+    ldi r20, 0
+    mov r21, r18
+ciclo_retorno:
+    ldi r18, 250
+ciclo_milisegundos:
+    dec r18
+    brne ciclo_milisegundos
+    dec r21
+    brne ciclo_retorno
+    ret
+
+
