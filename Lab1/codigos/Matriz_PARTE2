@@ -1,8 +1,10 @@
+; Define the start of the program
 .org 0x00
 
-ldi r20, 0xFF      
-out DDRD, r20      
-out DDRB, r20      
+; Inicialización
+ldi r20, 0xFF      ; Configura todos los pines como salida
+out DDRD, r20      ; Configura PORTD como salida
+out DDRB, r20      ; Configura PORTB como salida
 ldi r16, high (ramend)
 out sph, r16
 ldi r16, low (ramend)
@@ -24,22 +26,18 @@ ldi r16, low (3036)
 sts TCNT1L, r16
 
 
+; Ciclo principal
 main_loop:
-
 	ldi r16, 0xFF 
 	out portd, r16
-
 	call timmer 
-
 	ldi r16, 0xFF 
 	out portd, r16
-
     call mostrar_H
 	call mostrar_H
 	call mostrar_H
 	call mostrar_H
 	call mostrar_H
-	
 	ldi r16, 0xFF 
 	out portd, r16
 
@@ -51,7 +49,6 @@ main_loop:
 	call mostrar_A
 	call mostrar_A
 	call mostrar_A
-
 	ldi r16, 0xFF 
 	out portd, r16
 
@@ -63,7 +60,6 @@ main_loop:
 	call mostrar_P
 	call mostrar_P
 	call mostrar_P
-
 	ldi r16, 0xFF 
 	out portd, r16
 
@@ -81,6 +77,7 @@ main_loop:
 	call timmer
 	call timmer
 	
+
 	call mostrar_Y
 	call mostrar_Y
 	call mostrar_Y
@@ -92,6 +89,7 @@ main_loop:
 	call timmer
 	call timmer 
 	call timmer
+
 
 	call mostrar_W
 	call mostrar_W
@@ -120,19 +118,18 @@ main_loop:
 	call mostrar_E
 	call mostrar_E
 	call mostrar_E	
-
 	ldi r16, 0xFF 
 	out portd, r16
 
 	call timmer
 	call timmer
+
 
 	call mostrar_K
 	call mostrar_K
 	call mostrar_K
 	call mostrar_K
 	call mostrar_K	
-
 	ldi r16, 0xFF 
 	out portd, r16
 
@@ -144,7 +141,6 @@ main_loop:
 	call mostrar_E
 	call mostrar_E
 	call mostrar_E
-
 	ldi r16, 0xFF 
 	out portd, r16
 	
@@ -156,7 +152,6 @@ main_loop:
 	call mostrar_N
 	call mostrar_N
 	call mostrar_N
-	
 	ldi r16, 0xFF 
 	out portd, r16
 
@@ -168,7 +163,6 @@ main_loop:
 	call mostrar_D
 	call mostrar_D
 	call mostrar_D
-	
 	ldi r16, 0xFF 
 	out portd, r16
 
@@ -176,54 +170,55 @@ main_loop:
 	call timmer
 	call timmer
  
+
     rjmp main_loop   
 
+
 mostrar_H:
-    
-	ldi r16, 0x00
-    ldi r17, 0b00111100  
+    ldi r16, 0x00
+    ldi r17, 0b00111100  ; Fila 1 de "H"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 2 de "H"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 3 de "H"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 4 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 5 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 6 de "H"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 7 de "H"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 8 de "H"
     out PORTB, r16
     out PORTD, r17
     rcall deley
@@ -231,51 +226,50 @@ mostrar_H:
 
 
 mostrar_A:
-    
-	ldi r16, 0x00
-    ldi r17, 0b11000011  
+    ldi r16, 0x00
+    ldi r17, 0b11000011  ; Fila 1 de "A"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b10000001  
+    ldi r17, 0b10000001  ; Fila 2 de "A"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 3 de "A"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 4 de "A"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 5 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b00000000 
+    ldi r17, 0b00000000  ; Fila 6 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 7 de "A"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 8 de "A"
     out PORTB, r16
     out PORTD, r17
     rcall deley
@@ -283,370 +277,362 @@ mostrar_A:
 
 
 mostrar_P:
-    
-	ldi r16, 0x00
-    ldi r17, 0b10000000 
+    ldi r16, 0x00
+    ldi r17, 0b10000000  ; Fila 1 de "P" invertida
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 2 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 3 de "P" invertida
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b00000000 
+    ldi r17, 0b00000000  ; Fila 4 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b10000000 
+    ldi r17, 0b10000000  ; Fila 5 de "P" invertida
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b11111100  
+    ldi r17, 0b11111100  ; Fila 6 de "P" invertida
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b11111100  
+    ldi r17, 0b11111100  ; Fila 7 de "P" invertida
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b11111100  
+    ldi r17, 0b11111100  ; Fila 8 de "P" invertida
     out PORTB, r16
     out PORTD, r17
     rcall deley
     ret
 
 mostrar_Y: 
-    
-	ldi r16, 0x00
-    ldi r17, 0b00111100  
+    ldi r16, 0x00
+    ldi r17, 0b00111100  ; Fila 1 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 2 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 3 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b10011001 
+    ldi r17, 0b10011001  ; Fila 4 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b11000011  
+    ldi r17, 0b11000011  ; Fila 5 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b11100111 
+    ldi r17, 0b11100111  ; Fila 6 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b11100111  
+    ldi r17, 0b11100111  ; Fila 7 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b11100111  
+    ldi r17, 0b11100111  ; Fila 8 de "Y"
     out PORTB, r16
     out PORTD, r17
     rcall deley
-	
-	ret
+ret
 
 mostrar_W:
-  
+   ; Mostrar la letra "W"
     ldi r16, 0x00
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 1 de "W"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 2 de "W"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00111100 
+    ldi r17, 0b00111100  ; Fila 3 de "W"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b00100100  
+    ldi r17, 0b00100100  ; Fila 4 de "W"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 5 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 6 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b00011000  
+    ldi r17, 0b00011000  ; Fila 7 de "W"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b00111100 ; Fila 8 de "W"
+    ldi r17, 0b00111100  ; Fila 8 de "W"
     out PORTB, r16
     out PORTD, r17
     rcall deley
-	
-	ret
-
+ret
 mostrar_E: 
 
+ ; Mostrar la letra "E"
     ldi r16, 0x00
-    ldi r17, 0b00000000 
+    ldi r17, 0b00000000  ; Fila 1 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 2 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b11111100  
+    ldi r17, 0b11111100  ; Fila 3 de "E"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b11100000  
+    ldi r17, 0b11100000  ; Fila 4 de "E"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b11100000  
+    ldi r17, 0b11100000  ; Fila 5 de "E"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b11111100  
+    ldi r17, 0b11111100  ; Fila 6 de "E"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b00000000 
+    ldi r17, 0b00000000  ; Fila 7 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b00000000  
+    ldi r17, 0b00000000  ; Fila 8 vacía
     out PORTB, r16
     out PORTD, r17
     rcall deley
-	
-	ret
+ret
 
 mostrar_K:
-
+ ; Mostrar la letra "K"
     ldi r16, 0x00
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 1 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b10011100 
+    ldi r17, 0b10011100  ; Fila 2 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b11001100 
+    ldi r17, 0b11001100  ; Fila 3 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b11100000  
+    ldi r17, 0b11100000  ; Fila 4 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b11100000  
+    ldi r17, 0b11100000  ; Fila 5 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b11001100  
+    ldi r17, 0b11001100  ; Fila 6 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b10011100 
+    ldi r17, 0b10011100  ; Fila 7 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 8 de "K"
     out PORTB, r16
     out PORTD, r17
     rcall deley
-	
-	ret
+ret
 
 mostrar_N:
 
+   ; Mostrar la letra "N"
     ldi r16, 0x00
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 1 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b00111000  
+    ldi r17, 0b00111000  ; Fila 2 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00110000  
+    ldi r17, 0b00110000  ; Fila 3 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b00100100 
+    ldi r17, 0b00100100  ; Fila 4 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b00001100  
+    ldi r17, 0b00001100  ; Fila 5 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b00011100  
+    ldi r17, 0b00011100  ; Fila 6 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 7 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 8 de "N"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
-	ret
+ret
 
 mostrar_D:
-   
+    ; Mostrar la letra "D"
     ldi r16, 0x00
-    ldi r17, 0b11000000  
+    ldi r17, 0b11000000  ; Fila 1 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x01
-    ldi r17, 0b10000000 
+    ldi r17, 0b10000000  ; Fila 2 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x02
-    ldi r17, 0b00011100 
+    ldi r17, 0b00011100  ; Fila 3 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x03
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 4 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x04
-    ldi r17, 0b00111100  
+    ldi r17, 0b00111100  ; Fila 5 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x05
-    ldi r17, 0b00011100  
+    ldi r17, 0b00011100  ; Fila 6 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x06
-    ldi r17, 0b10000000  
+    ldi r17, 0b10000000  ; Fila 7 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
 
     ldi r16, 0x07
-    ldi r17, 0b11000000  
+    ldi r17, 0b11000000  ; Fila 8 de "D"
     out PORTB, r16
     out PORTD, r17
     rcall deley
-	
-	ret
-
+ret
 timmer: 
-
 	sbis TIFR1, TOV1
 	rjmp timmer 
 	sbi TIFR1, TOV1
@@ -660,12 +646,9 @@ deley:
 
     ldi r20, 60
     ldi r19, 70
-
 L1:
-
     dec r19
     brne L1  
     dec r20
     brne L1
-
-
+    ret
