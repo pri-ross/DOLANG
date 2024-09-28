@@ -1,0 +1,274 @@
+.ORG 0x0000
+RJMP Inicio
+
+.equ F_CPU = 16000000
+.equ baud = 9600
+.equ bps = 103   
+
+.def Puerta = r20
+
+
+Inicio:
+    ldi r16, HIGH(RAMEND)
+    out SPH, r16
+    ldi r16, LOW(RAMEND)
+    out SPL, r16
+
+    ldi r18, 0xFF
+    out DDRD, r18                
+
+
+	ldi Puerta, 0x00
+	out DDRB, Puerta
+
+
+    ldi r16, LOW(bps)
+    ldi r17, HIGH(bps)
+    rcall initUART                ; Inicializar la UART
+
+wait:
+    call getc                     ; Esperar un dato del UART
+    cpi r16, 0                    ; Verificar si es 0
+    breq wait                     ; Si es 0, sigue esperando
+    rcall putc                    ; Enviar el carácter recibido
+    call menu                     ; Llamar al menú con el dato recibido
+    rjmp wait                     ; Repetir el ciclo
+
+initUART:
+    sts UBRR0L, r16               ; Configurar la tasa de baudios
+    sts UBRR0H, r17
+    ldi r16, (1<<RXEN0)|(1<<TXEN0) ; Habilitar receptor y transmisor
+    sts UCSR0B, r16
+    ret
+
+putc:
+    lds r17, UCSR0A
+    sbrs r17, UDRE0               ; Esperar hasta que el buffer esté vacío
+    rjmp putc
+    sts UDR0, r16                 ; Enviar el dato
+    ret
+
+getc:
+    lds r17, UCSR0A
+    sbrs r17, RXC0                ; Esperar hasta que haya un dato recibido
+    rjmp getc
+    lds r16, UDR0                 ; Cargar el dato recibido en r16
+    ret
+
+configurar_timer0:
+    ldi r19, (1 << WGM01)          
+    out TCCR0A, r19            
+
+    ldi r19, (1 << CS02) | (1 << CS00)
+    out TCCR0B, r19                
+
+    ldi r19, 250               
+    out OCR0A, r19             
+
+    ldi r19, (1 << OCIE0A)        
+    sts TIMSK0, r19               
+
+    ldi r19, 0                     ; Limpiar el contador
+    out TCNT0, r19                 ; Inicializar TCNT0
+
+    sei                             ; Habilitar interrupciones globales
+    ret
+
+espera_2seg:
+    lds r20, TIFR0                
+    sbrs r20, OCF0A                
+    rjmp espera_2seg               
+
+    ; Pausa de 1 segundo
+    ldi r19, 0x7D                 
+    out OCR0A, r19               
+    ldi r19, 0                    
+    out TCNT0, r19              
+
+espera_1seg:
+    lds r20, TIFR0                
+    sbrs r20, OCF0A               
+    rjmp espera_1seg             
+    ret                            
+
+Tiempo_Lavado:
+    rcall espera_2seg              
+    rcall espera_1seg 
+
+menu:
+    call palabra              
+	call liviano
+	call esperarA
+    rjmp menu  
+
+liviano:
+	cpi r16, 'L'                ; Comparar si el valor recibido es 'A' (65)
+	call getc
+    sbi PORTD, PD7          
+	rjmp liviano
+
+cargaLiviana:
+    ldi r16, 'c'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'r'
+    rcall putc
+    ldi r16, 'g'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, ' '
+    rcall putc
+    ldi r16, 'l'
+    rcall putc
+    ldi r16, 'i'
+    rcall putc
+    ldi r16, 'v'
+    rcall putc
+    ldi r16, 'i'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'n'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, '\n'
+    rcall putc
+
+ 
+esperarA:
+    cpi r16, 'A'                ; Comparar si el valor recibido es 'A' (65)
+	call getc
+    sbi PORTD, PD6              ; Si es 'A', encender el LED en el pin PD7
+	rjmp esperarA        ; Si no es 'A', volver a esperar
+
+continuar:
+    in Puerta, PINB            ; Leer el valor del puerto PINB (PB0)
+    sbis PINB, PB0          ; Saltar si PB0 está en alto (puerta cerrada)
+    rjmp menu               ; Si PB0 está en bajo (puerta abierta), volver al menú
+
+    ; Si la puerta está cerrada (PB0 en 1), continuar con la secuencia
+    sbi PORTD, PD5
+    rjmp lav_l              ; Llamar a la función lav_l
+     
+    rjmp menu               ; Si PB0 está en bajo (puerta abierta), volver al menú
+
+    ; Si la puerta está cerrada (PB0 en 1), continuar con la secuencia
+    cbi PORTD, PD0
+    sbi PORTD, PD5
+    rjmp Lav_L              ; Llamar a la función Lav_L
+
+palabra:
+    ldi r16, 'E'
+    rcall putc
+    ldi r16, 'l'
+    rcall putc
+    ldi r16, 'i'
+    rcall putc
+    ldi r16, 'g'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, ' '
+    rcall putc
+    ldi r16, 'C'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'r'
+    rcall putc
+    ldi r16, 'g'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, ':'
+    rcall putc
+    ldi r16, '\n'
+    rcall putc
+    ret
+
+Lav_L:
+    cbi PORTD, PD1
+    clr r16
+    ldi r16, 5           ; Número de ciclos (5 veces encendido 2 seg, pausa 1 seg)
+    ldi r16, 'L'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'v'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'n'
+    rcall putc
+    ldi r16, 'd'
+    rcall putc
+    ldi r16, 'o'
+    rcall putc
+    ldi r16, '\n'
+ciclo_lavado:
+    rcall Tiempo_lavado
+    dec r16
+    brne ciclo_lavado     ; Repetir mientras r16 no sea 0
+    rjmp centr_L          ; Una vez completado el ciclo, saltar a centr_L
+
+centr_L:
+	sbi PORTD, PD2
+    clr r16
+    ldi r16, 'C'
+    rcall putc
+    ldi r16, 'e'
+    rcall putc
+    ldi r16, 'n'
+    rcall putc
+    ldi r16, 't'
+    rcall putc
+    ldi r16, 'r'
+    rcall putc
+    ldi r16, 'i'
+    rcall putc
+    ldi r16, 'f'
+    rcall putc
+    ldi r16, 'u'
+    rcall putc
+    ldi r16, 'g'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'd'
+    rcall putc
+    ldi r16, 'o'
+    rcall putc
+    ldi r16, '\n'
+    rcall putc
+    rjmp secado_L
+
+
+secado_L:
+	cbi PORTD, PD2
+	sbi PORTD, PD3
+    clr r16 
+    ldi r16, 'S'
+    rcall putc
+    ldi r16, 'e'
+    rcall putc
+    ldi r16, 'c'
+    rcall putc
+    ldi r16, 'a'
+    rcall putc
+    ldi r16, 'd'
+    rcall putc
+    ldi r16, 'o'
+    rcall putc
+    ldi r16, '\n'
+    rcall putc
+    ldi r16, 'i'
+    rcall putc
+    ldi r16, 'i'
+    rcall putc
+	cbi PORTD, PD5
+    ret
+
+
