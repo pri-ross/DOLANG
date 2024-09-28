@@ -1,5 +1,14 @@
 ; Define the start of the program
 .org 0x00
+rjmp inicio 
+
+
+.equ F_CPU = 16000000
+.equ baud = 9600
+.equ bps = 103   ; Valor precalculado para 9600 baudios a 16 MHz
+
+
+inicio: 
 
 ; Inicialización
 ldi r20, 0xFF      ; Configura todos los pines como salida
@@ -25,16 +34,38 @@ sts TCNT1H,  r16
 ldi r16, low (3036)
 sts TCNT1L, r16
 
-menu:
+	ldi r26, LOW(bps)
+    ldi r27, HIGH(bps)
+    rcall initUART               ; Inicializar UART
 
-call mensaje 
-call timmer 
-call figuras
+menu:
+call palabra
+
+
+call timmer
+
+
+call mostrarM
+ldi r16, 0x00
+out portd, r16
+out portb, r16
+call mostrarF
 rjmp menu 
 
+mostrarM: 
+	cpi r26, 'M'                ; Comparar si el valor recibido es 'A' (65)
+	call getc
+	call mensaje 
+rjmp mostrarM
 
+mostrarF: 
+	cpi r26, 'F'                ; Comparar si el valor recibido es 'A' (65)
+	call getc
+	call figuras 
+rjmp mostrarF
 
 mensaje:
+	
 	ldi r16, 0xFF 
 	out portd, r16
 	call timmer 
@@ -985,6 +1016,168 @@ timmer:
 	ldi r16, low(34286)
 	sts TCNT1L, r16
 	ret
+
+wait:
+    call getc                    ; Esperar un dato del UART
+    cpi r26, 0                   ; Verificar si es 0
+    breq wait                    ; Si es 0, sigue esperando
+    ldi r28, 1
+    add r26, r28
+    rcall putc                   ; Enviar el carácter recibido +1
+    ldi r26, 0
+    rjmp wait                    ; Repetir el ciclo
+
+initUART:
+    sts UBRR0L, r26              ; Configurar la tasa de baudios
+    sts UBRR0H, r27
+    ldi r26, (1<<RXEN0)|(1<<TXEN0) ; Habilitar receptor y transmisor
+    sts UCSR0B, r26
+    ret
+
+putc:
+    lds r27, UCSR0A
+    sbrs r27, UDRE0              ; Esperar hasta que el buffer esté vacío
+    rjmp putc
+    sts UDR0, r26                ; Enviar el dato
+    ldi r26, 0
+    ret
+
+getc:
+    lds r27, UCSR0A
+    sbrs r27, RXC0               ; Esperar hasta que haya un dato recibido
+    rjmp getc
+    lds r26, UDR0                ; Cargar el dato recibido en r16
+    ret
+
+
+palabra:
+
+ldi r26, 'B'
+call putc
+ldi r26, 'I'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, 'N'
+call putc
+ldi r26, 'V'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, 'N'
+call putc
+ldi r26, 'I'
+call putc
+ldi r26, 'D'
+call putc
+ldi r26, 'O'
+call putc
+ldi r26, 'S'
+call putc
+ldi r26, '\n'
+call putc
+ldi r26, 'P'
+call putc
+ldi r26, 'R'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, 'S'
+call putc
+ldi r26, 'I'
+call putc
+ldi r26, 'O'
+call putc
+ldi r26, 'N'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, ':'
+call putc
+ldi r26, '\n'
+call putc
+ldi r26, 'M'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'P'
+call putc
+ldi r26, 'A'
+call putc
+ldi r26, 'R'
+call putc
+ldi r26, 'A'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'V'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, 'R'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'M'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, 'N'
+call putc
+ldi r26, 'S'
+call putc
+ldi r26, 'A'
+call putc
+ldi r26, 'J'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'O'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'F'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'P'
+call putc
+ldi r26, 'A'
+call putc
+ldi r26, 'R'
+call putc
+ldi r26, 'A'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'V'
+call putc
+ldi r26, 'E'
+call putc
+ldi r26, 'R'
+call putc
+ldi r26, ' '
+call putc
+ldi r26, 'F'
+call putc
+ldi r26, 'I'
+call putc
+ldi r26, 'G'
+call putc
+ldi r26, 'U'
+call putc
+ldi r26, 'R'
+call putc
+ldi r26, 'A'
+call putc
+ldi r26, 'S'
+call putc
+ldi r26, '\n'
+call putc
+ret
+
 
 deley:
 
