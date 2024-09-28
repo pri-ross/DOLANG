@@ -27,10 +27,13 @@ sts TCNT1L, r16
 
 menu:
 
-
+call mensaje 
+call timmer 
 call figuras
 rjmp menu 
-; Ciclo principal
+
+
+
 mensaje:
 	ldi r16, 0xFF 
 	out portd, r16
@@ -175,7 +178,7 @@ mensaje:
 	call timmer
  
 
-    rjmp mensaje   
+ret 
 
 
 mostrar_H:
@@ -635,32 +638,86 @@ mostrar_D:
     out PORTB, r16
     out PORTD, r17
     rcall deley
-ret
+	ret
 
 figuras:
     ldi r16, 0xFF 
 	out portd, r16
 	call timmer 
+
 	ldi r16, 0xFF 
 	out portd, r16
 
 call mostarCaraFeliz
+call mostarCaraFeliz
+call mostarCaraFeliz
+call mostarCaraFeliz
+call mostarCaraFeliz
+call mostarCaraFeliz
+call mostarCaraFeliz
+call mostarCaraFeliz
+
     ldi r16, 0xFF 
 	out portd, r16
 	call timmer 
 	call timmer 
+
 call mostrarCaraTriste
+call mostrarCaraTriste
+call mostrarCaraTriste
+call mostrarCaraTriste
+call mostrarCaraTriste
+call mostrarCaraTriste
+call mostrarCaraTriste
+call mostrarCaraTriste
+    
+	ldi r16, 0xFF 
+	out portd, r16
 	call timmer 
 	call timmer 
 call mostrarCorazon
+call mostrarCorazon
+call mostrarCorazon
+call mostrarCorazon
+call mostrarCorazon
+call mostrarCorazon
+call mostrarCorazon
+call mostrarCorazon
+	
+	ldi r16, 0xFF 
+	out portd, r16
 	call timmer 
-	call timmer 
+	call timmer
+	 
 call mostrarRombo
+call mostrarRombo
+call mostrarRombo
+call mostrarRombo
+call mostrarRombo
+call mostrarRombo
+call mostrarRombo
+call mostrarRombo
+
+	ldi r16, 0xFF 
+	out portd, r16
 	call timmer 
 	call timmer 
+
+call mostrarMarciano
+call mostrarMarciano
+call mostrarMarciano
+call mostrarMarciano
+call mostrarMarciano
+call mostrarMarciano
+call mostrarMarciano
 call mostrarMarciano
 
-rjmp figuras
+	ldi r16, 0xFF 
+	out portd, r16
+	call timmer 
+	call timmer
+
+ret
 
 mostarCaraFeliz:
 ldi r16,0x00
