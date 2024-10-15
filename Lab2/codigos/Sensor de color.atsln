@@ -1,22 +1,111 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Atmel Studio Solution File, Format Version 11.00
-VisualStudioVersion = 14.0.23107.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Sensor de color", "Sensor de color\Sensor de color.cproj", "{2285C48D-296E-43FD-A7B6-69885F64CFFD}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|AVR = Debug|AVR
-		Release|AVR = Release|AVR
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Debug|AVR.ActiveCfg = Debug|AVR
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Debug|AVR.Build.0 = Debug|AVR
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Release|AVR.ActiveCfg = Release|AVR
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Release|AVR.Build.0 = Release|AVR
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+void esperarTX();
+void enviarADC(int);
+void enviarMensaje(char* mensaje);
+void detectarColor(int valorADC);
+
+volatile int valorADC = -1;
+int valorEstablecido = 0; 
+
+int main(void) {
+	
+	TCCR1A = 0;
+	TCCR1B = (1<<CS12);  
+	TCCR1C = 0;
+	TIMSK1 = (1<<TOIE1); 
+	TCNT1 = 3036;  
+	ADMUX = (1<<REFS0); 
+	ADCSRA = (1<<ADEN)|(1<<ADATE)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1);  
+	ADCSRB = (1<<ADTS2)|(1<<ADTS1);  
+	DIDR0 = (1<<ADC0D);  
+	UCSR0A = 0;
+	UCSR0B = (1<<TXEN0);  
+	UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);  
+	UBRR0 = 103;  
+	UDR0 = '@';
+	esperarTX();
+	
+	sei(); 
+	
+	while (1) {
+		if(valorADC >= 0) {
+			enviarADC(valorADC);  
+			detectarColor(valorADC); 
+			valorADC = -1;
+		}
+	}
+}
+
+
+ISR(TIMER1_OVF_vect) {
+	TCNT1 = 3036; 
+}
+
+
+ISR(ADC_vect) {
+	valorADC = ADC;  
+}
+
+
+void enviarADC(int datoEnviar) {
+	UDR0 = datoEnviar/1000 + '0';
+	esperarTX();
+	datoEnviar %= 1000;
+	UDR0 = datoEnviar/100 + '0';
+	esperarTX();
+	datoEnviar %= 100;
+	UDR0 = datoEnviar/10 + '0';
+	esperarTX();
+	UDR0 = datoEnviar % 10 + '0';
+	esperarTX();
+	UDR0 = '\n';
+	esperarTX();
+	UDR0 = '\r';
+	esperarTX();
+}
+
+
+void detectarColor(int valorADC) {
+	char mensaje[50];
+	
+	if (valorADC >= 10 && valorADC <= 50) {
+		
+		valorEstablecido = 30;  // color 1
+		sprintf(mensaje, "Color 1 detectado\r\n");
+		enviarMensaje(mensaje);
+		} else if (valorADC >= 70 && valorADC <= 110) {
+		
+		valorEstablecido = 90;  //color 2
+		sprintf(mensaje, "Color 2 detectado\r\n");
+		enviarMensaje(mensaje);
+		} else if (valorADC >= 130 && valorADC <= 170) {
+	
+		valorEstablecido = 150;  //  color 3
+		sprintf(mensaje, "Color 3 detectado\r\n");
+		enviarMensaje(mensaje);
+		} else {
+		sprintf(mensaje, "Color desconocido\r\n");
+		enviarMensaje(mensaje);
+	}
+	
+	int diferencia = valorADC - valorEstablecido;
+	sprintf(mensaje, "Valor establecido: %d\r\n", valorEstablecido);
+	enviarMensaje(mensaje);
+	sprintf(mensaje, "Diferencia: %d\r\n", diferencia);
+	enviarMensaje(mensaje);
+}
+
+void enviarMensaje(char* mensaje) {
+	for (int i = 0; mensaje[i] != '\0'; i++) {
+		UDR0 = mensaje[i];
+		esperarTX();
+	}
+}
+
+
+void esperarTX() {
+	while (!(UCSR0A & (1<<UDRE0)));
+}
+
