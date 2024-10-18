@@ -1,25 +1,26 @@
 #define F_CPU 16000000UL
-#include <xc.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include <avr/interrupt.h>
-#include <stdio.h>  
+#include <stdio.h>
+#include <stdlib.h>
 
 #define Sensor0 0
 #define BAUD 9600
 #define BRC ((F_CPU/16/BAUD)-1)
 
+int punto_medio = 26;
+
 void setupADC() {
-	ADMUX |= (1<<REFS0);
-	ADMUX &= ~(1<<ADLAR);
-	ADCSRA |= (1<<ADPS2) | (1<<ADPS1);
-	ADCSRA |= (1<<ADEN);
+	ADMUX = (1 << REFS0);
+	ADMUX &= ~(1 << ADLAR);
+	ADCSRA |= (1 << ADPS2) | (1 << ADPS1);
+	ADCSRA |= (1 << ADEN);
 }
 
 uint16_t readADC(uint8_t channel) {
 	ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
 	ADCSRA |= (1 << ADSC);
-	while (ADCSRA & (1<<ADSC));
+	while (ADCSRA & (1 << ADSC));
 	return ADC;
 }
 
@@ -41,36 +42,124 @@ void UART_sendString(const char* str) {
 	}
 }
 
-void UART_sendADCValue(uint16_t adcValue) {
-	char buffer[16];
-	sprintf(buffer, "temperatura : %d\r", adcValue);
+void UART_sendTemp(float temp) {
+	char buffer[32];
+	sprintf(buffer, "Temp: %.2f C\r\n", temp);
 	UART_sendString(buffer);
 }
 
-void fast_pwm_init(void) {
-	TCCR1A = (1 << WGM11) | (1 << COM1A1) | (1 << COM1B1);
-	TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS11);
-	ICR1 = 4999;
-	DDRB |= (1 << PB1) | (1 << PB2);
+void setupPWM() {
+	TCCR0A |= (1 << WGM00) | (1 << WGM01) | (1 << COM0A1);
+	TCCR0B |= (1 << CS01) | (1 << CS00);
+	DDRD |= (1 << PD6);
+}
+
+void setFanSpeed(uint8_t speed) {
+	OCR0A = speed;
+}
+
+float ADCtoTemp(uint16_t adcValue) {
+	return (adcValue / 1023.0) * 100.0;
+}
+
+void controlSystem(float temp) {
+	if (temp < punto_medio - 4) {
+		PORTB |= (1 << PB0);
+		UART_sendString("Calefactor: ON\r\n");
+		setFanSpeed(0);
+		} else if (temp >= punto_medio - 3 && temp <= punto_medio + 4) {
+		PORTB &= ~(1 << PB0);
+		UART_sendString("Dentro del rango ideal\r\n");
+		setFanSpeed(0);
+		} else if (temp > punto_medio + 4 && temp <= punto_medio + 14) {
+		PORTB &= ~(1 << PB0);
+		UART_sendString("Ventilador: Baja\r\n");
+		setFanSpeed(85);
+		} else if (temp > punto_medio + 15 && temp <= punto_medio + 24) {
+		UART_sendString("Ventilador: Media\r\n");
+		setFanSpeed(170);
+		} else if (temp > punto_medio + 25) {
+		UART_sendString("Ventilador: Alta\r\n");
+		setFanSpeed(255);
+	}
+}
+
+char UART_receiveChar() {
+	while (!(UCSR0A & (1 << RXC0)));
+	return UDR0;
+}
+
+void UART_receiveString(char* buffer, uint8_t maxLength) {
+	uint8_t i = 0;
+	char receivedChar;
+	
+	while (i < maxLength - 1) {
+		receivedChar = UART_receiveChar();
+		if (receivedChar == '\r' || receivedChar == '\n') {
+			break;
+		}
+		buffer[i++] = receivedChar;
+		UART_sendChar(receivedChar);
+	}
+	buffer[i] = '\0';
+}
+
+void printDefaultRanges() {
+	UART_sendString("\r\n--------------------------- RANGOS PREDETERMINADOS ---------------------------\r\n");
+	UART_sendString(" - Baja temperatura: calefactor ON, ventilador OFF (0 - 22 grados)\r\n");
+	UART_sendString(" - Temperatura ideal: calefactor OFF, ventilador OFF (23 - 30 grados)\r\n");
+	UART_sendString(" - Temperatura un poco por arriba: ventilador baja velocidad (31 - 40 grados)\r\n");
+	UART_sendString(" - Temperatura medianamente elevada: ventilador media velocidad (41 - 50 grados)\r\n");
+	UART_sendString(" - Temperatura elevada: ventilador alta velocidad (> 50 grados)\r\n");
+	UART_sendString("Si elige cambiar el punto medio, estos rangos se ajustaran proporcionalmente.\r\n");
+	UART_sendString("-----------------------------------------------------------------------------\r\n\r\n");
+}
+
+void menuAdjustPoint() {
+	printDefaultRanges();
+	
+	UART_sendString("Desea ajustar el punto medio? (S/N): ");
+	char option = UART_receiveChar();
+	_delay_ms(100);
+
+	if (option == 'S' || option == 's') {
+		UART_sendString("\r\nIngrese nuevo punto medio: ");
+		char buffer[16];
+		UART_receiveString(buffer, 16);
+		
+		int newPoint = atoi(buffer);
+		if (newPoint > 0 && newPoint <= 100) {
+			punto_medio = newPoint;
+			char msg[64];
+			sprintf(msg, "\r\nNuevo punto medio: %d\r\n", punto_medio);
+			UART_sendString(msg);
+			UART_sendString("Los rangos se ajustarán proporcionalmente al nuevo punto medio.\r\n");
+			} else {
+			UART_sendString("\r\nValor no válido, usando punto medio predeterminado: 26\r\n");
+			punto_medio = 26;
+		}
+		} else {
+		UART_sendString("\r\nUsando punto medio predeterminado: 26\r\n");
+		punto_medio = 26;
+	}
 }
 
 int main() {
 	UART_init();
-	fast_pwm_init();
 	setupADC();
+	setupPWM();
+	DDRB |= (1 << PB0);
+
+	menuAdjustPoint();
 
 	uint16_t adcValue;
+	float temperature;
 
 	while (1) {
 		adcValue = readADC(Sensor0);
-		float voltage = adcValue * (5.0 / 1023.0);
-
-		OCR1A = adcValue / 4;
-		OCR1B = 255 - (adcValue / 4);
-		
-		_delay_ms(10);
-
-		UART_sendADCValue(adcValue);
-	
+		temperature = ADCtoTemp(adcValue);
+		UART_sendTemp(temperature);
+		controlSystem(temperature);
+		_delay_ms(50);
 	}
 }
