@@ -1,0 +1,702 @@
+#include <avr/io.h>
+#include <util/delay.h>
+
+#define F_CPU 16000000UL
+#define D6_PIN PD6
+#define D7_PIN PD7
+#define D5_PIN PD5
+#define D4_PIN PD4
+#define D2_PIN PD2
+#define D3_PIN PD3
+#define DELAY_DOWN_MS 4000
+
+void UART_init(uint16_t ubrr) {
+	UBRR0H = (unsigned char)(ubrr >> 8);
+	UBRR0L = (unsigned char)ubrr;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0); 
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); 
+}
+
+void UART_sendChar(char c) {
+	while (!(UCSR0A & (1 << UDRE0)));  
+	UDR0 = c;
+}
+
+void UART_sendString(const char* str) {
+	while (*str) {
+		UART_sendChar(*str++);  
+	}
+}
+
+char UART_receiveChar() {
+	while (!(UCSR0A & (1 << RXC0)));  
+	return UDR0;
+}
+
+void setup() {
+	DDRD |= (1 << D6_PIN) | (1 << D7_PIN) | (1 << D5_PIN) | (1 << D4_PIN) | (1 << D2_PIN) | (1 << D3_PIN);
+}
+
+void bajar() {
+
+	PORTD |= (1 << D2_PIN);
+	_delay_ms(8000);
+	PORTD &= ~(1 << D2_PIN);
+}
+
+void subir() {
+	PORTD |= (1 << D3_PIN);
+	_delay_ms(8000);
+	PORTD &= ~(1 << D3_PIN);
+}
+
+void adelante() {
+
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(60000);
+	PORTD &= ~(1 << D4_PIN);
+}
+
+void adelante_corto() {
+
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(100);
+	PORTD &= ~(1 << D4_PIN);
+}
+
+void adelante_corto2() {
+
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(300);
+	PORTD &= ~(1 << D4_PIN);
+}
+
+void atras() {
+	PORTD |= (1 << D5_PIN);
+	_delay_ms(60000);
+	PORTD &= ~(1 << D5_PIN);
+}
+
+void atras_corto() {
+	PORTD |= (1 << D5_PIN);
+	_delay_ms(100);
+	PORTD &= ~(1 << D5_PIN);
+}
+
+void atras_corto2() {
+	PORTD |= (1 << D5_PIN);
+	_delay_ms(300);
+	PORTD &= ~(1 << D5_PIN);
+}
+
+void derecha() {
+
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(60000);
+	PORTD &= ~(1 << D7_PIN);
+}
+
+void derecha_corto() {
+
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(100);
+	PORTD &= ~(1 << D7_PIN);
+}
+
+void derecha_corto2() {
+
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(300);
+	PORTD &= ~(1 << D7_PIN);
+}
+
+void izquierda() {
+
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(60000);
+	PORTD &= ~(1 << D6_PIN);
+}
+
+void izquierda_corto() {
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(100);
+	PORTD &= ~(1 << D6_PIN);
+}
+
+void izquierda_corto2() {
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(300);
+	PORTD &= ~(1 << D6_PIN);
+}
+
+void centro() {
+	izquierda();
+	izquierda();
+	izquierda();
+	adelante();
+	adelante();
+	adelante();
+	
+}
+
+void diagonal_derecha_abajo() {
+	for (int i = 0; i < 115; i++) {
+		adelante_corto2();
+		derecha_corto2();
+	}
+}
+
+void diagonal_izquierda_abajo() {
+	for (int i = 0; i < 100; i++) {
+		adelante_corto2();
+		izquierda_corto2();
+	}
+}
+
+void diagonal_derecha_arriba() {
+	for (int i = 0; i < 115; i++) {
+		atras_corto2();
+		derecha_corto2();
+	}
+}
+
+void diagonal_izquierda_arriba() {
+	for (int i = 0; i < 100; i++) {
+		atras_corto2();
+		izquierda_corto2();
+	}
+}
+
+void diagonal_triangulo(){
+		for (int i = 0; i < 200; i++) {
+			adelante_corto2();
+			derecha_corto2();
+		}
+	
+}
+
+void vertice_triangulo(){
+		PORTD |= (1 << D5_PIN);
+		_delay_ms(55000);
+		PORTD &= ~(1 << D5_PIN);
+
+}
+
+void triangulo(){
+	bajar();
+	_delay_ms(30000);
+	diagonal_triangulo();
+	izquierda();
+	vertice_triangulo();
+}
+
+void cuadrado(){
+	bajar();
+	_delay_ms(30000);
+	izquierda();
+	adelante();
+	derecha();
+	atras();
+}
+
+void circulo() {
+	int largo, corto;
+	bajar();
+	_delay_ms(30000);
+	
+	for (int i = 0; i < 15; i++) {
+		largo = 15 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) izquierda_corto2();
+		for (int j = 0; j < corto; j++) adelante_corto2();
+		_delay_ms(100);
+	}
+
+	for (int i = 0; i < 15; i++) {
+		largo = 15 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) adelante_corto2();
+		for (int j = 0; j < corto; j++) derecha_corto2();
+		_delay_ms(100);
+	}
+
+	for (int i = 0; i < 15; i++) {
+		largo = 15 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) derecha_corto2();
+		for (int j = 0; j < corto; j++) atras_corto2();
+		_delay_ms(100);
+	}
+
+	for (int i = 0; i < 15; i++) {
+		largo = 15 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) atras_corto2();
+		for (int j = 0; j < corto; j++) izquierda_corto2();
+		_delay_ms(100);
+	}
+	
+}
+
+void oreja_izq() {
+	int largo, corto;
+	bajar();
+	_delay_ms(30000); 
+
+	for (int i = 0; i < 50; i++) {
+		largo = 50 - i;       
+		corto = i / 2;       
+		for (int j = 0; j < largo; j++) atras_corto();     
+		for (int j = 0; j < corto; j++) izquierda_corto(); 
+		_delay_ms(100);  
+	}
+
+	for (int i = 0; i < 50; i++) {
+		largo = 50 - i;         
+		corto = i / 2;       
+		for (int j = 0; j < largo; j++) adelante_corto(); 
+		for (int j = 0; j < corto; j++) derecha_corto(); 
+		_delay_ms(100);  
+	}
+}
+
+void oreja_der() {
+	int largo, corto;
+	bajar();
+	_delay_ms(30000); 
+
+	for (int i = 0; i < 50; i++) {
+		largo = 50 - i;       
+		corto = i / 2;        
+		for (int j = 0; j < largo; j++) atras_corto();   
+		for (int j = 0; j < corto; j++) derecha_corto();
+		_delay_ms(100);  
+	}
+
+	for (int i = 0; i < 50; i++) {
+		largo = 50 - i;        
+		corto = i / 2;       
+		for (int j = 0; j < largo; j++) adelante_corto();
+		for (int j = 0; j < corto; j++) izquierda_corto();   
+		_delay_ms(100);  
+	}
+}
+
+void mini_izq(){
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(10000);
+	PORTD &= ~(1 << D6_PIN);
+}
+
+void mini_der() {
+
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(10000);
+	PORTD &= ~(1 << D7_PIN);
+}
+
+void mini_adl(){
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(10000);
+	PORTD &= ~(1 << D4_PIN);
+}
+
+void mini_atr() {
+	PORTD |= (1 << D5_PIN);
+	_delay_ms(10000);
+	PORTD &= ~(1 << D5_PIN);
+}
+
+void ojo_izq(){
+	subir();
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(16000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(20000);
+	PORTD &= ~(1 << D4_PIN);
+	bajar();
+	_delay_ms(30000);
+	mini_adl();
+	mini_izq();
+	mini_atr();
+	mini_der();
+}
+
+void ojo_der(){
+	subir();
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(32000);
+	PORTD &= ~(1 << D7_PIN);
+	bajar();
+	_delay_ms(30000);
+	mini_adl();
+	mini_der();
+	mini_atr();
+	mini_izq();
+}
+
+void bigotes(){
+	subir();
+	
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(30000);
+	PORTD &= ~(1 << D4_PIN);
+
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	subir();
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(20000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	nariz_raton();
+	
+	subir();
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(20000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	subir();
+	
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(8000);
+	PORTD &= ~(1 << D4_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	subir();
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+}
+
+void conejo(){
+	oreja_izq();
+	oreja_der();
+	circulo();
+	ojo_izq();
+	ojo_der();
+	bigotes();
+}
+
+void semicirculo(){
+	int largo, corto;
+	bajar();
+	_delay_ms(30000);
+	
+	for (int i = 0; i < 10; i++) {
+		largo = 10 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) atras_corto2();
+		for (int j = 0; j < corto; j++) izquierda_corto2();
+		_delay_ms(100);
+	}
+	
+	for (int i = 0; i < 10; i++) {
+		largo = 10 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) izquierda_corto2();
+		for (int j = 0; j < corto; j++) adelante_corto2();
+		_delay_ms(100);
+	}
+	
+}
+
+void semicirculo_grande(){
+	int largo, corto;
+	bajar();
+	_delay_ms(30000);
+	
+	for (int i = 0; i < 15; i++) {
+		largo = 15 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) atras_corto2();
+		for (int j = 0; j < corto; j++) izquierda_corto2();
+		_delay_ms(100);
+	}
+	
+	for (int i = 0; i < 15; i++) {
+		largo = 15 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) izquierda_corto2();
+		for (int j = 0; j < corto; j++) adelante_corto2();
+		_delay_ms(100);
+	}
+}
+
+void orejas_raton(){
+	PORTD |= (1 << D5_PIN);
+	_delay_ms(24000);
+	PORTD &= ~(1 << D5_PIN);
+	semicirculo();
+	subir();
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(8000);
+	PORTD &= ~(1 << D6_PIN);
+	semicirculo();
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(24000);
+	PORTD &= ~(1 << D4_PIN);
+	
+}
+
+void ojos_raton(){
+	subir();
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(13000);
+	PORTD &= ~(1 << D7_PIN);
+	bajar();
+	_delay_ms(3000);
+	
+	mini_adl();
+	mini_der();
+	mini_atr();
+	mini_izq();
+	
+	subir();
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(30000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	bajar();
+	
+	mini_adl();
+	mini_der();
+	mini_atr();
+	mini_izq();
+}
+
+void bigotes_raton(){
+	subir();
+	
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(20000);
+	PORTD &= ~(1 << D4_PIN);
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	subir();
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(20000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D6_PIN);
+	
+	subir();
+	
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(8000);
+	PORTD &= ~(1 << D4_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	subir();
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(20000);
+	PORTD &= ~(1 << D7_PIN);
+	
+	bajar();
+	_delay_ms(30000);
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(40000);
+	PORTD &= ~(1 << D7_PIN);
+	
+}
+
+void nariz_raton() {
+	int largo, corto;
+	bajar();
+	_delay_ms(30000);
+	
+	for (int i = 0; i < 5; i++) {
+		largo = 5 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) izquierda_corto2();
+		for (int j = 0; j < corto; j++) adelante_corto2();
+		_delay_ms(100);
+	}
+
+	for (int i = 0; i < 5; i++) {
+		largo = 5 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) adelante_corto2();
+		for (int j = 0; j < corto; j++) derecha_corto2();
+		_delay_ms(100);
+	}
+
+	for (int i = 0; i < 5; i++) {
+		largo = 5 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) derecha_corto2();
+		for (int j = 0; j < corto; j++) atras_corto2();
+		_delay_ms(100);
+	}
+
+	for (int i = 0; i < 5; i++) {
+		largo = 5 - i;
+		corto = i;
+		for (int j = 0; j < largo; j++) atras_corto2();
+		for (int j = 0; j < corto; j++) izquierda_corto2();
+		_delay_ms(100);
+	}
+	
+}
+
+void raton(){
+	semicirculo_grande();
+	diagonal_derecha_abajo();
+	nariz_raton();
+	diagonal_derecha_arriba();
+	orejas_raton();
+	ojos_raton();
+	bigotes_raton();
+
+}
+
+void mostrar_menu() {
+	UART_sendString("\nMenu:\n");
+	UART_sendString("1. Subir Punta\n");
+	UART_sendString("2. Bajar Punta\n");
+	UART_sendString("3. Adelante\n");
+	UART_sendString("4. Atras\n");
+	UART_sendString("5. Derecha\n");
+	UART_sendString("6. Izquierda\n");
+	UART_sendString("7. Cuadrado\n");
+	UART_sendString("8. Triangulo\n");
+	UART_sendString("9. Circulo\n");
+	UART_sendString("A. Centro (Recomendado para dibujar Conejo o Raton)\n");
+	UART_sendString("B. Conejo\n");
+	UART_sendString("C. Raton\n");
+	UART_sendString("Elige una opcion (1-9 y A-C): ");
+}
+
+int main(void) {
+	setup();
+	UART_init(103);
+	
+	char opcion;
+
+	while (1) {
+		mostrar_menu();  
+		opcion = UART_receiveChar();  
+		UART_sendChar(opcion);  
+		UART_sendChar('\n');
+
+		if (opcion == '1') {
+			UART_sendString("Subiendo...\n");
+			subir();
+		}
+		else if (opcion == '2') {
+		UART_sendString("Bajando...\n");
+		bajar();
+		}
+		else if (opcion == '3') {
+			UART_sendString("Moviendo adelante...\n");
+			adelante();
+		}
+		else if (opcion == '4') {
+			UART_sendString("Moviendo atras...\n");
+			atras();
+		}
+		else if (opcion == '5') {
+			UART_sendString("Moviendo derecha...\n");
+			derecha();
+		}
+		else if (opcion == '6') {
+			UART_sendString("Moviendo izquierda...\n");
+			izquierda();
+		}
+		else if (opcion == '7') {
+			UART_sendString("Dibujando un cuadrado...\n");
+			cuadrado();
+		}
+		else if (opcion == '8') {
+			UART_sendString("Dibujando un triangulo...\n");
+			triangulo();
+		}
+		else if (opcion == '9') {
+			UART_sendString("Dibujando un circulo...\n");
+			circulo();
+		}
+		else if (opcion == 'A') {
+			UART_sendString("Moviendo al Centro...\n");
+			centro();
+		}
+		else if (opcion == 'B') {
+			UART_sendString("Dibujando un Conejo...\n");
+			conejo();
+		}
+		else if (opcion == 'C') {
+			UART_sendString("Dibujando un Raton...\n");
+			raton();
+		}
+		else {
+			UART_sendString("Intenta de nuevo.\n");
+		}
+
+		_delay_ms(3000);  
+	}
+
+	return 0;
+}
