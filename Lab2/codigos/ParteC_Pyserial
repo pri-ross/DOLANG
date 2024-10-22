@@ -1,0 +1,87 @@
+import serial
+import time
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import re
+
+puerto_serial = 'COM15'  
+tasa_baudios = 9600
+arduino = serial.Serial(puerto_serial, tasa_baudios)
+time.sleep(2) 
+
+patron = re.compile(r"Pot1: (\d+), Pot2: (\d+), Error: (-?\d+), PWM: (\d+)")
+
+def leer_datos_serie(arduino):
+   
+    try:
+        cadena = arduino.readline().decode('utf-8').strip()  
+        coincidencia = patron.match(cadena)  
+        if coincidencia:
+            pot1 = int(coincidencia.group(1))
+            pot2 = int(coincidencia.group(2))
+            error = int(coincidencia.group(3))
+            pwm = int(coincidencia.group(4)) 
+            return (pot1, pot2, error, pwm)
+        else:
+            return None
+    except (ValueError, IndexError):
+        return None
+
+def actualizar_grafica(frame, arduino, datos1, datos2, datos_error, datos_pwm, linea1, linea2, linea_error, linea_pwm, ax):
+   
+    nuevos_datos = leer_datos_serie(arduino)
+    
+    if nuevos_datos is not None:
+        datos1.append(nuevos_datos[0])  
+        datos2.append(nuevos_datos[1])  
+        datos_error.append(nuevos_datos[2]) 
+        datos_pwm.append(nuevos_datos[3])  
+
+        if len(datos1) > 50:
+            datos1.pop(0)
+            datos2.pop(0)
+            datos_error.pop(0)
+            datos_pwm.pop(0)
+
+        linea1.set_data(range(len(datos1)), datos1)
+        linea2.set_data(range(len(datos2)), datos2)
+        linea_error.set_data(range(len(datos_error)), datos_error)
+        linea_pwm.set_data(range(len(datos_pwm)), datos_pwm)
+
+        ax.relim()
+        ax.autoscale_view()
+
+    return linea1, linea2, linea_error, linea_pwm
+
+def main():
+    figura, ax = plt.subplots(figsize=(10, 6))
+    figura.suptitle("Valor de Potenciómetros, Error y Señal PWM del Motor")
+
+    ax.set_title("Potenciómetros, Error y PWM del Motor")
+    ax.set_ylabel("Valores")
+    ax.set_xlabel("Muestras")
+
+    ax.set_xlim(0, 50)  
+    ax.set_ylim(-1024, 1024)  
+
+    datos1, datos2, datos_error, datos_pwm = [], [], [], []
+    linea1, = ax.plot([], [], lw=2, color='blue', label="Pot1")
+    linea2, = ax.plot([], [], lw=2, color='green', label="Pot2")
+    linea_error, = ax.plot([], [], lw=2, color='orange', label="Error")
+    linea_pwm, = ax.plot([], [], lw=2, color='red', label="PWM Motor")
+
+    ax.legend(loc="upper right")
+
+   
+    animacion = animation.FuncAnimation(
+        figura, actualizar_grafica, fargs=(arduino, datos1, datos2, datos_error, datos_pwm, linea1, linea2, linea_error, linea_pwm, ax),
+        interval=15
+    )
+
+    plt.tight_layout()
+    plt.show()
+
+    arduino.close()
+
+if __name__ == "__main__":
+    main()
