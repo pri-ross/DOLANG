@@ -1,59 +1,117 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdint.h>
+#include <stdio.h>
 
-#define F_CPU 16000000UL 
+#define F_CPU 16000000UL
+#define MAX_PWM 255
 
-// Configuración UART
+#define ENA PB2
+#define IN1 PD7
+#define IN2 PD6
+
 void UART_init(uint16_t ubrr) {
-    UBRR0H = (unsigned char) (ubrr >> 8);
-    UBRR0L = (unsigned char) ubrr;
-    UCSR0B = (1 << RXEN0) | (1 << TXEN0);  
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); 
-}
-
-void UART_sendChar(char data) {
-    while (!(UCSR0A & (1 << UDRE0))); 
-    UDR0 = data;
+	UBRR0H = (unsigned char)(ubrr >> 8);
+	UBRR0L = (unsigned char)ubrr;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
 void UART_sendString(const char *str) {
-    while (*str) {
-        UART_sendChar(*str++);
-    }
+	while (*str) {
+		while (!(UCSR0A & (1 << UDRE0)));
+		UDR0 = *str++;
+	}
 }
 
-// Configuración ADC
 void ADC_init() {
-    ADMUX = (1 << REFS0); 
-    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);  
+	ADMUX = (1 << REFS0);
+	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
 }
 
 uint16_t ADC_read(uint8_t channel) {
-    ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);  
-    ADCSRA |= (1 << ADSC); 
-    while (ADCSRA & (1 << ADSC));  
-    return ADC;
+	ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
+	ADCSRA |= (1 << ADSC);
+	while (ADCSRA & (1 << ADSC));
+	return ADC;
+}
+
+void PWM_init() {
+	DDRB |= (1 << ENA);
+	DDRD |= (1 << IN1) | (1 << IN2);
+
+	TCCR1A = (1 << WGM10) | (1 << COM1B1);
+	TCCR1B = (1 << WGM12) | (1 << CS11);
+}
+
+void PWM_setDutyCycle(uint8_t duty) {
+	if (duty < 185) duty = 185;
+	if (duty > MAX_PWM) duty = MAX_PWM;
+	OCR1B = duty;
+}
+
+
+void motor_setDirection(int8_t dir) {
+	if (dir > 0) {
+		PORTD |= (1 << IN1);
+		PORTD &= ~(1 << IN2);
+		} else if (dir < 0) {
+		PORTD |= (1 << IN2);
+		PORTD &= ~(1 << IN1);
+		} else {
+		PORTD &= ~((1 << IN1) | (1 << IN2));
+	}
 }
 
 int main(void) {
-    uint16_t adcValue1, adcValue2;
-    int16_t error;  
+	uint16_t adcValue1, adcValue2;
+	int16_t error;
+	uint8_t pwmValue;
 
-    UART_init(103);  // Baud rate de 9600 para F_CPU = 16 MHz
-    ADC_init();
+	UART_init(103);
+	ADC_init();
+	PWM_init();
 
-    while (1) {
-        adcValue1 = ADC_read(0);  // Leer el ADC en el canal 0
-        adcValue2 = ADC_read(1);  // Leer el ADC en el canal 1
-        error = adcValue1 - adcValue2;
+	while (1) {
+		adcValue1 = ADC_read(0);
+		adcValue2 = ADC_read(1);
+		error = adcValue1 - adcValue2;
 
-        // Enviar los valores ADC por UART en un rango de 0 a 1023
-        char buffer[64];
-        snprintf(buffer, sizeof(buffer), "Pot1: %u, Pot2: %u, Error: %d\n", adcValue1, adcValue2, error);
-        UART_sendString(buffer);
+		if (error > 0) {
+			motor_setDirection(1);  
+			
+			if (error > MAX_PWM) {
+				pwmValue = MAX_PWM;
+				} else {
+				pwmValue = error;
+			}
 
-        _delay_ms(500);  
-    }
-    return 0;
+			PWM_setDutyCycle(pwmValue);
+
+			} else if (error < 0) {
+			motor_setDirection(-1);  
+			
+			if (-error > MAX_PWM) {
+				pwmValue = MAX_PWM;
+				} else {
+				pwmValue = -error;
+			}
+
+			PWM_setDutyCycle(pwmValue);
+
+			} else {
+			motor_setDirection(0);
+			PWM_setDutyCycle(0);
+			pwmValue = 0;
+		}
+
+
+		char buffer[64];
+		snprintf(buffer, sizeof(buffer), "Pot1: %u, Pot2: %u, Error: %d, PWM: %u\n", adcValue1, adcValue2, error, pwmValue);
+		UART_sendString(buffer);
+
+		_delay_ms(100);
+	}
+
+	return 0;
 }
