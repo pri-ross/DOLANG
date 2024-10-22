@@ -1,111 +1,79 @@
+#define F_CPU 16000000UL
 #include <avr/io.h>
-#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdio.h>
 
-void esperarTX();
-void enviarADC(int);
-void enviarMensaje(char* mensaje);
-void detectarColor(int valorADC);
-
-volatile int valorADC = -1;
-int valorEstablecido = 0; 
+void USART_init(unsigned int ubrr);
+void USART_transmit(char data);
+void USART_sendString(const char* str);
+unsigned int ADC_read(void);
+void servo_move(uint8_t angle);
+void display_color(uint8_t color);
 
 int main(void) {
+	USART_init(103);  
+
 	
-	TCCR1A = 0;
-	TCCR1B = (1<<CS12);  
-	TCCR1C = 0;
-	TIMSK1 = (1<<TOIE1); 
-	TCNT1 = 3036;  
-	ADMUX = (1<<REFS0); 
-	ADCSRA = (1<<ADEN)|(1<<ADATE)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1);  
-	ADCSRB = (1<<ADTS2)|(1<<ADTS1);  
-	DIDR0 = (1<<ADC0D);  
-	UCSR0A = 0;
-	UCSR0B = (1<<TXEN0);  
-	UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);  
-	UBRR0 = 103;  
-	UDR0 = '@';
-	esperarTX();
-	
-	sei(); 
+	ADMUX = (1<<REFS0);              
+	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1);  
+	DDRB |= (1<<PB1);
 	
 	while (1) {
-		if(valorADC >= 0) {
-			enviarADC(valorADC);  
-			detectarColor(valorADC); 
-			valorADC = -1;
+		unsigned int adcValue = ADC_read(); 
+		char buffer[20];
+		sprintf(buffer, "ADC: %u\n", adcValue);  
+		USART_sendString(buffer);
+
+		if (adcValue < 341) {
+			servo_move(0);  
+			display_color(1);  
+			} else if (adcValue < 682) {
+			servo_move(90);  
+			display_color(2);
+			} else {
+			servo_move(180);  
+			display_color(3);
 		}
+
+		_delay_ms(1500); 
 	}
 }
 
-
-ISR(TIMER1_OVF_vect) {
-	TCNT1 = 3036; 
+void USART_init(unsigned int ubrr) {
+	UBRR0H = (unsigned char)(ubrr>>8);
+	UBRR0L = (unsigned char)ubrr;
+	UCSR0B = (1<<TXEN0);
+	UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);
 }
 
-
-ISR(ADC_vect) {
-	valorADC = ADC;  
-}
-
-
-void enviarADC(int datoEnviar) {
-	UDR0 = datoEnviar/1000 + '0';
-	esperarTX();
-	datoEnviar %= 1000;
-	UDR0 = datoEnviar/100 + '0';
-	esperarTX();
-	datoEnviar %= 100;
-	UDR0 = datoEnviar/10 + '0';
-	esperarTX();
-	UDR0 = datoEnviar % 10 + '0';
-	esperarTX();
-	UDR0 = '\n';
-	esperarTX();
-	UDR0 = '\r';
-	esperarTX();
-}
-
-
-void detectarColor(int valorADC) {
-	char mensaje[50];
-	
-	if (valorADC >= 10 && valorADC <= 50) {
-		
-		valorEstablecido = 30;  // color 1
-		sprintf(mensaje, "Color 1 detectado\r\n");
-		enviarMensaje(mensaje);
-		} else if (valorADC >= 70 && valorADC <= 110) {
-		
-		valorEstablecido = 90;  //color 2
-		sprintf(mensaje, "Color 2 detectado\r\n");
-		enviarMensaje(mensaje);
-		} else if (valorADC >= 130 && valorADC <= 170) {
-	
-		valorEstablecido = 150;  //  color 3
-		sprintf(mensaje, "Color 3 detectado\r\n");
-		enviarMensaje(mensaje);
-		} else {
-		sprintf(mensaje, "Color desconocido\r\n");
-		enviarMensaje(mensaje);
-	}
-	
-	int diferencia = valorADC - valorEstablecido;
-	sprintf(mensaje, "Valor establecido: %d\r\n", valorEstablecido);
-	enviarMensaje(mensaje);
-	sprintf(mensaje, "Diferencia: %d\r\n", diferencia);
-	enviarMensaje(mensaje);
-}
-
-void enviarMensaje(char* mensaje) {
-	for (int i = 0; mensaje[i] != '\0'; i++) {
-		UDR0 = mensaje[i];
-		esperarTX();
-	}
-}
-
-
-void esperarTX() {
+void USART_transmit(char data) {
 	while (!(UCSR0A & (1<<UDRE0)));
+	UDR0 = data;
 }
 
+void USART_sendString(const char* str) {
+	while (*str) {
+		USART_transmit(*str++);
+	}
+}
+
+unsigned int ADC_read(void) {
+	ADCSRA |= (1<<ADSC); 
+	while (ADCSRA & (1<<ADSC));
+	return ADC;
+}
+
+void servo_move(uint8_t angle) {
+	TCCR1A = (1<<COM1A1) | (1<<WGM11);
+	TCCR1B = (1<<WGM13) | (1<<WGM12) | (1<<CS11);  
+	ICR1 = 20000;  
+
+	uint16_t pulse_width = 1000 + ((angle * 1000) / 180);
+	OCR1A = pulse_width;
+}
+
+void display_color(uint8_t color) {
+	char buffer[10];
+	sprintf(buffer, "Color %u\n", color);
+	USART_sendString(buffer);
+}
