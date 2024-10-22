@@ -238,6 +238,35 @@ void circulo() {
 	
 }
 
+void cruz() {
+	bajar();
+	_delay_ms(30000);  
+
+	
+	PORTD |= (1 << D7_PIN);
+	_delay_ms(30000);
+	PORTD &= ~(1 << D7_PIN);
+
+	subir(); 
+
+	PORTD |= (1 << D4_PIN);
+	_delay_ms(15000);
+	PORTD &= ~(1 << D4_PIN);
+
+	
+	PORTD |= (1 << D6_PIN);
+	_delay_ms(15000);
+	PORTD &= ~(1 << D6_PIN);
+
+	bajar();  
+	_delay_ms(30000);
+
+	PORTD |= (1 << D5_PIN);
+	_delay_ms(30000);
+	PORTD &= ~(1 << D5_PIN);
+}
+
+
 void oreja_izq() {
 	int largo, corto;
 	bajar();
@@ -628,7 +657,8 @@ void mostrar_menu() {
 	UART_sendString("A. Centro (Recomendado para dibujar Conejo o Raton)\n");
 	UART_sendString("B. Conejo\n");
 	UART_sendString("C. Raton\n");
-	UART_sendString("Elige una opcion (1-9 y A-C): ");
+	UART_sendString("D. Cruz\n");
+	UART_sendString("Elige una opcion (1-9 y A-D): ");
 }
 
 int main(void) {
@@ -690,6 +720,10 @@ int main(void) {
 		else if (opcion == 'C') {
 			UART_sendString("Dibujando un Raton...\n");
 			raton();
+		}
+		else if (opcion == 'D') {
+			UART_sendString("Dibujando una Cruz...\n");
+			cruz();
 		}
 		else {
 			UART_sendString("Intenta de nuevo.\n");
