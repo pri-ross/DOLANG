@@ -1,22 +1,67 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Atmel Studio Solution File, Format Version 11.00
-VisualStudioVersion = 14.0.23107.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "cerradura", "cerradura\cerradura.cproj", "{2285C48D-296E-43FD-A7B6-69885F64CFFD}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|AVR = Debug|AVR
-		Release|AVR = Release|AVR
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Debug|AVR.ActiveCfg = Debug|AVR
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Debug|AVR.Build.0 = Debug|AVR
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Release|AVR.ActiveCfg = Release|AVR
-		{2285C48D-296E-43FD-A7B6-69885F64CFFD}.Release|AVR.Build.0 = Release|AVR
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-EndGlobal
+#include <avr/io.h>
+#include <avr/eeprom.h>
+#include <util/delay.h>
+
+#define LED_VERDE PORTB0
+#define LED_ROJO PORTB1
+#define BUZZER PORTD2
+
+uint8_t intentos = 0;
+uint8_t EEMEM contraseña[6] = {1, 2, 3, 4}; 
+void inicializar_puertos() {
+	DDRB |= (1 << LED_VERDE) | (1 << LED_ROJO); 
+	DDRD |= (1 << BUZZER); 
+}
+
+void mostrar_estado(int correcto) {
+	if (correcto) {
+		PORTB |= (1 << LED_VERDE);
+		PORTB &= ~(1 << LED_ROJO);
+		} else {
+		PORTB |= (1 << LED_ROJO);
+		PORTB &= ~(1 << LED_VERDE);
+	}
+}
+
+void leer_contraseña(uint8_t *buffer, uint8_t longitud) {
+	eeprom_read_block((void*)buffer, (const void*)contraseña, longitud);
+}
+
+int verificar_contraseña(uint8_t *ingresada, uint8_t longitud) {
+	uint8_t almacenada[6];
+	leer_contraseña(almacenada, longitud);
+	for (uint8_t i = 0; i < longitud; i++) {
+		if (ingresada[i] != almacenada[i]) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int ingresar_contraseña() {
+	uint8_t ingresada[6] = {1, 2, 3, 4}; 
+	if (verificar_contraseña(ingresada, 4)) {
+		mostrar_estado(1);
+		intentos = 0;
+		return 1;
+		} else {
+		intentos++;
+		mostrar_estado(0);
+		if (intentos >= 3) {
+			PORTD |= (1 << BUZZER); 
+			_delay_ms(1000);
+			PORTD &= ~(1 << BUZZER);
+		}
+		return 0;
+	}
+}
+
+int main(void) {
+	inicializar_puertos();
+	
+	while (1) {
+		if (ingresar_contraseña()) {
+			_delay_ms(2000); 
+		}
+	}
+}
