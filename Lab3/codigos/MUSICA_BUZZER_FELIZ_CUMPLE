@@ -1,0 +1,74 @@
+#define F_CPU 16000000UL
+#include <avr/io.h>
+
+#define NOTA_C4  262  // Do4
+#define NOTA_D4  294  // Re4
+#define NOTA_E4  330  // Mi4
+#define NOTA_F4  349  // Fa4
+#define NOTA_G4  392  // Sol4
+#define NOTA_A4  440  // La4
+#define NOTA_AS4 466  // La#4
+#define NOTA_C5  523  // Do5
+
+#define RESTA     0
+
+#define NOTA_ENTERA 800
+#define NOTA_CUARTO (NOTA_ENTERA / 4)
+#define NOTA_OCTAVO (NOTA_ENTERA / 8)
+#define NOTA_CUARTO_PUNTUADO (NOTA_CUARTO * 1.5)
+
+int melodia[] = {
+	NOTA_C4, NOTA_CUARTO, NOTA_C4, NOTA_OCTAVO,
+	NOTA_D4, NOTA_CUARTO_PUNTUADO, NOTA_C4, NOTA_CUARTO_PUNTUADO, NOTA_F4, NOTA_CUARTO_PUNTUADO,
+	NOTA_E4, NOTA_ENTERA, NOTA_C4, NOTA_CUARTO, NOTA_C4, NOTA_OCTAVO,
+	NOTA_D4, NOTA_CUARTO_PUNTUADO, NOTA_C4, NOTA_CUARTO_PUNTUADO, NOTA_G4, NOTA_CUARTO_PUNTUADO,
+	NOTA_F4, NOTA_ENTERA, NOTA_C4, NOTA_CUARTO, NOTA_C4, NOTA_OCTAVO,
+	NOTA_C5, NOTA_CUARTO_PUNTUADO, NOTA_A4, NOTA_CUARTO_PUNTUADO, NOTA_F4, NOTA_CUARTO_PUNTUADO,
+	NOTA_E4, NOTA_CUARTO_PUNTUADO, NOTA_D4, NOTA_CUARTO_PUNTUADO, NOTA_AS4, NOTA_CUARTO, NOTA_AS4, NOTA_OCTAVO,
+	NOTA_A4, NOTA_CUARTO_PUNTUADO, NOTA_F4, NOTA_CUARTO_PUNTUADO, NOTA_G4, NOTA_CUARTO_PUNTUADO,
+	NOTA_F4, NOTA_ENTERA
+};
+
+int cantidad_notas = sizeof(melodia) / sizeof(melodia[0]) / 2;
+
+void configurar_timer1() {
+	TCCR1A = (1 << COM1A0);
+	TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS10);
+	DDRB |= (1 << PB1);
+}
+
+void retraso_ms(unsigned int ms) {
+	for (unsigned int i = 0; i < ms; i++) {
+		for (unsigned int j = 0; j < 4000; j++) {
+			__asm__ __volatile__("nop");
+		}
+	}
+}
+
+void reproducir_tono(int frecuencia) {
+	if (frecuencia == RESTA) {
+		ICR1 = 0;
+		} else {
+		ICR1 = F_CPU / (2 * frecuencia);
+	}
+}
+
+void reproducir_melodia() {
+	for (int i = 0; i < cantidad_notas * 2; i += 2) {
+		int nota = melodia[i];
+		int duracion = melodia[i + 1];
+		reproducir_tono(nota);
+		retraso_ms(duracion * 0.9);
+		reproducir_tono(0);
+		retraso_ms(duracion * 0.1);
+	}
+}
+
+int main(void) {
+	configurar_timer1();
+
+	while (1) {
+		reproducir_melodia();
+		retraso_ms(2000);
+	}
+}
