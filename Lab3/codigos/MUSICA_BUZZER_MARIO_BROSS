@@ -1,0 +1,135 @@
+#define F_CPU 16000000UL  
+#include <avr/io.h>
+#include <util/delay.h>
+#include <stdlib.h>  // Para usar abs()
+
+#define NOTE_C4  262    // Do (C4)
+#define NOTE_D4  294    // Re (D4)
+#define NOTE_E4  330    // Mi (E4)
+#define NOTE_F4  349    // Fa (F4)
+#define NOTE_G4  392    // Sol (G4)
+#define NOTE_GS4 415    // Sol sostenido (G#4)
+#define NOTE_A4  440    // La (A4)
+#define NOTE_AS4 466    // La sostenido (A#4)
+#define NOTE_B4  494    // Si (B4)
+#define NOTE_C5  523    // Do (C5)
+#define NOTE_D5  587    // Re (D5)
+#define NOTE_DS5 622    // Re sostenido (D#5)
+#define NOTE_E5  659    // Mi (E5)
+#define NOTE_F5  698    // Fa (F5)
+#define NOTE_FS5 740    // Fa sostenido (F#5)
+#define NOTE_G5  784    // Sol (G5)
+#define NOTE_A5  880    // La (A5)
+#define REST     0      // Silencio
+
+int tiempo = 400;
+
+int melodia[] = {
+	NOTE_E5,8, NOTE_E5,8, REST,8, NOTE_E5,8, REST,8, NOTE_C5,8, NOTE_E5,8,
+	NOTE_G5,4, REST,4, NOTE_G4,8, REST,4,
+	NOTE_C5,-4, NOTE_G4,8, REST,4, NOTE_E4,-4,
+	NOTE_A4,4, NOTE_B4,4, NOTE_AS4,8, NOTE_A4,4,
+	NOTE_G4,-8, NOTE_E5,-8, NOTE_G5,-8, NOTE_A5,4, NOTE_F5,8, NOTE_G5,8,
+	REST,8, NOTE_E5,4, NOTE_C5,8, NOTE_D5,8, NOTE_B4,-4,
+
+	NOTE_C5,-4, NOTE_G4,8, REST,4, NOTE_E4,-4,
+	NOTE_A4,4, NOTE_B4,4, NOTE_AS4,8, NOTE_A4,4,
+	NOTE_G4,-8, NOTE_E5,-8, NOTE_G5,-8, NOTE_A5,4, NOTE_F5,8, NOTE_G5,8,
+	REST,8, NOTE_E5,4, NOTE_C5,8, NOTE_D5,8, NOTE_B4,-4,
+
+	REST,4, NOTE_G5,8, NOTE_FS5,8, NOTE_F5,8, NOTE_DS5,4, NOTE_E5,8,
+	REST,8, NOTE_GS4,8, NOTE_A4,8, NOTE_C4,8, REST,8, NOTE_A4,8, NOTE_C5,8, NOTE_D5,8,
+	REST,4, NOTE_DS5,4, REST,8, NOTE_D5,-4,
+	NOTE_C5,2, REST,2,
+
+	REST,4, NOTE_G5,8, NOTE_FS5,8, NOTE_F5,8, NOTE_DS5,4, NOTE_E5,8,
+	REST,8, NOTE_GS4,8, NOTE_A4,8, NOTE_C4,8, REST,8, NOTE_A4,8, NOTE_C5,8, NOTE_D5,8,
+	REST,4, NOTE_DS5,4, REST,8, NOTE_D5,-4,
+	NOTE_C5,2, REST,2,
+
+	NOTE_C5,8, NOTE_C5,4, NOTE_C5,8, REST,8, NOTE_C5,8, NOTE_D5,4,
+	NOTE_E5,8, NOTE_C5,4, NOTE_A4,8, NOTE_G4,2,
+
+	NOTE_C5,8, NOTE_C5,4, NOTE_C5,8, REST,8, NOTE_C5,8, NOTE_D5,8, NOTE_E5,8,
+	REST,1,
+	NOTE_C5,8, NOTE_C5,4, NOTE_C5,8, REST,8, NOTE_C5,8, NOTE_D5,4,
+	NOTE_E5,8, NOTE_C5,4, NOTE_A4,8, NOTE_G4,2,
+	NOTE_E5,8, NOTE_E5,8, REST,8, NOTE_E5,8, REST,8, NOTE_C5,8, NOTE_E5,4,
+	NOTE_G5,4, REST,4, NOTE_G4,4, REST,4,
+	NOTE_C5,-4, NOTE_G4,8, REST,4, NOTE_E4,-4,
+	NOTE_A4,4, NOTE_B4,4, NOTE_AS4,8, NOTE_A4,4,
+	NOTE_G4,-8, NOTE_E5,-8, NOTE_G5,-8, NOTE_A5,4, NOTE_F5,8, NOTE_G5,8,
+	REST,8, NOTE_E5,4, NOTE_C5,8, NOTE_D5,8, NOTE_B4,-4,
+
+	NOTE_C5,-4, NOTE_G4,8, REST,4, NOTE_E4,-4,
+	NOTE_A4,4, NOTE_B4,4, NOTE_AS4,8, NOTE_A4,4,
+	NOTE_G4,-8, NOTE_E5,-8, NOTE_G5,-8, NOTE_A5,4, NOTE_F5,8, NOTE_G5,8,
+	REST,8, NOTE_E5,4, NOTE_C5,8, NOTE_D5,8, NOTE_B4,-4,
+
+	NOTE_E5,8, NOTE_C5,4, NOTE_G4,8, REST,4, NOTE_GS4,4,
+	NOTE_A4,8, NOTE_F5,4, NOTE_F5,8, NOTE_A4,2,
+	NOTE_D5,-8, NOTE_A5,-8, NOTE_A5,-8, NOTE_A5,-8, NOTE_G5,-8, NOTE_F5,-8,
+
+	NOTE_E5,8, NOTE_C5,4, NOTE_A4,8, NOTE_G4,2,
+	NOTE_E5,8, NOTE_C5,4, NOTE_G4,8, REST,4, NOTE_GS4,4,
+	NOTE_A4,8, NOTE_F5,4, NOTE_F5,8, NOTE_A4,2,
+	NOTE_B4,8, NOTE_F5,4, NOTE_F5,8, NOTE_F5,-8, NOTE_E5,-8, NOTE_D5,-8,
+	NOTE_C5,8, NOTE_E4,4, NOTE_E4,8, NOTE_C4,2,
+
+	NOTE_C5,-4, NOTE_G4,-4, NOTE_E4,4,
+	NOTE_A4,-8, NOTE_B4,-8, NOTE_A4,-8, NOTE_GS4,-8, NOTE_AS4,-8, NOTE_GS4,-8,
+	NOTE_G4,8, NOTE_D4,8, NOTE_E4,-2,
+};
+
+int num_notas = sizeof(melodia) / sizeof(melodia[0]) / 2;
+
+void configurar_temporizador1() {
+	TCCR1A = (1 << COM1A0);
+	TCCR1B = (1 << WGM13) | (1 << WGM12) | (1 << CS10);
+	DDRB |= (1 << PB1);
+}
+
+void esperar_ms(unsigned int ms) {
+	for (unsigned int i = 0; i < ms; i++) {
+		for (unsigned int j = 0; j < 4000; j++) {
+			__asm__ __volatile__("nop");
+		}
+	}
+}
+
+void reproducir_nota(int frecuencia) {
+	if (frecuencia == REST) {
+		ICR1 = 0;
+		} else {
+		ICR1 = F_CPU / (2 * frecuencia);
+	}
+}
+
+void reproducir_melodia() {
+	int nota_entera = (60000 * 4) / tiempo;
+
+	for (int i = 0; i < num_notas * 2; i += 2) {
+		int divisor = melodia[i + 1];
+		int duracion_nota;
+
+		if (divisor > 0) {
+			duracion_nota = nota_entera / divisor;
+			} else {
+			duracion_nota = (nota_entera / abs(divisor)) * 1.5;
+		}
+
+		reproducir_nota(melodia[i]);
+		esperar_ms(duracion_nota * 0.9);
+		reproducir_nota(REST);
+		esperar_ms(duracion_nota * 0.1);
+	}
+}
+
+int main(void) {
+	configurar_temporizador1();
+
+	while (1) {
+		reproducir_melodia();
+		esperar_ms(2000);
+	}
+}
