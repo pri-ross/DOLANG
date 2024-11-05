@@ -1,0 +1,294 @@
+#define F_CPU 16000000UL
+#include <avr/io.h>
+#include <util/delay.h>
+
+#define NOTA_C4  262  // Do4
+#define NOTA_D4  294  // Re4
+#define NOTA_E4  330  // Mi4
+#define NOTA_F4  349  // Fa4
+#define NOTA_G4  392  // Sol4
+#define NOTA_A4  440  // La4
+#define NOTA_AS4 466  // La#4
+#define NOTA_C5  523  // Do5
+#define NOTA_E5  659  // Mi5
+#define NOTA_G5  784  // Sol5
+#define NOTA_F5  698  // Fa5
+#define NOTA_D5  587  // Re5
+#define NOTA_B4  494  // Si4
+#define NOTA_A5  880  // La5
+#define NOTE_C4  262    // Do (C4)
+#define NOTE_D4  294    // Re (D4)
+#define NOTE_E4  330    // Mi (E4)
+#define NOTE_F4  349    // Fa (F4)
+#define NOTE_G4  392    // Sol (G4)
+#define NOTE_GS4 415    // Sol sostenido (G#4)
+#define NOTE_A4  440    // La (A4)
+#define NOTE_AS4 466    // La sostenido (A#4)
+#define NOTE_B4  494    // Si (B4)
+#define NOTE_C5  523    // Do (C5)
+#define NOTE_D5  587    // Re (D5)
+#define NOTE_DS5 622    // Re sostenido (D#5)
+#define NOTE_E5  659    // Mi (E5)
+#define NOTE_F5  698    // Fa (F5)
+#define NOTE_FS5 740    // Fa sostenido (F#5)
+#define NOTE_G5  784    // Sol (G5)
+#define NOTE_A5  880    // La (A5)
+#define REST     0
+#define RESTA     0
+
+#define BAUD 9600
+#define MY_UBRR F_CPU/16/BAUD-1
+
+void USART_Init(unsigned int ubrr) {
+	UBRR0H = (unsigned char)(ubrr >> 8);
+	UBRR0L = (unsigned char)ubrr;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0); 
+}
+
+void USART_Transmit(unsigned char data) {
+	while (!(UCSR0A & (1 << UDRE0))); 
+	UDR0 = data;                    
+}
+
+void enviar_mensaje(const char *mensaje) {
+	while (*mensaje) {
+		USART_Transmit(*mensaje++);
+	}
+}
+
+void configurar_timer1() {
+	TCCR1A = 0;
+	TCCR1B = (1 << WGM12) | (1 << CS10);
+	DDRB |= (1 << PB1); 
+}
+
+
+void reproducir_tono(int frecuencia) {
+	if (frecuencia == RESTA) {
+		TCCR1B &= ~(1 << CS10); 
+		} else {
+		TCCR1B |= (1 << CS10); 
+		OCR1A = F_CPU / (2 * frecuencia) - 1; 
+		TCCR1A |= (1 << COM1A0);
+	}
+}
+
+void reproducir_feliz_cumple() {
+	int duracion = 300; 
+
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_D4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_F4); _delay_ms(duracion);
+reproducir_tono(NOTA_E4); _delay_ms(duracion);
+_delay_ms(200); // Pausa entre frases
+
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_D4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_G4); _delay_ms(duracion);
+reproducir_tono(NOTA_F4); _delay_ms(duracion);
+_delay_ms(200); 
+
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_C5); _delay_ms(duracion);
+reproducir_tono(NOTA_A4); _delay_ms(duracion);
+reproducir_tono(NOTA_F4); _delay_ms(duracion);
+reproducir_tono(NOTA_E4); _delay_ms(duracion);
+reproducir_tono(NOTA_D4); _delay_ms(duracion);
+_delay_ms(200);
+
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_D4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_F4); _delay_ms(duracion);
+reproducir_tono(NOTA_E4); _delay_ms(duracion);
+_delay_ms(200); 
+
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_D4); _delay_ms(duracion);
+reproducir_tono(NOTA_C4); _delay_ms(duracion);
+reproducir_tono(NOTA_F4); _delay_ms(duracion);
+reproducir_tono(NOTA_E4); _delay_ms(duracion);
+_delay_ms(200); 
+}
+
+void reproducir_mario() {
+	int duracion = 300; 
+
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_G4); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_G4); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_E4); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_B4); _delay_ms(duracion);
+reproducir_tono(NOTE_AS4); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_G4); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(NOTE_A5); _delay_ms(duracion);
+reproducir_tono(NOTE_F5); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_D5); _delay_ms(duracion);
+reproducir_tono(NOTE_B4); _delay_ms(duracion);
+
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_G4); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_E4); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_B4); _delay_ms(duracion);
+reproducir_tono(NOTE_AS4); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_G4); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(NOTE_A5); _delay_ms(duracion);
+reproducir_tono(NOTE_F5); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_D5); _delay_ms(duracion);
+reproducir_tono(NOTE_B4); _delay_ms(duracion);
+
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(NOTE_FS5); _delay_ms(duracion);
+reproducir_tono(NOTE_F5); _delay_ms(duracion);
+reproducir_tono(NOTE_DS5); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_GS4); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_C4); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_D5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_DS5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_D5); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_G5); _delay_ms(duracion);
+reproducir_tono(NOTE_FS5); _delay_ms(duracion);
+reproducir_tono(NOTE_F5); _delay_ms(duracion);
+reproducir_tono(NOTE_DS5); _delay_ms(duracion);
+reproducir_tono(NOTE_E5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_GS4); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_C4); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_A4); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(NOTE_D5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_DS5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+reproducir_tono(NOTE_D5); _delay_ms(duracion);
+reproducir_tono(NOTE_C5); _delay_ms(duracion);
+reproducir_tono(REST); _delay_ms(duracion);
+}
+
+int main(void) {
+	configurar_timer1(); 
+	USART_Init(MY_UBRR);  
+
+	DDRD &= ~((1 << PD6) | (1 << PD7));  
+	DDRB &= ~((1 << PB0) | (1 << PB2) | (1 << PB3) | (1 << PB4) | (1 << PB5));
+	
+	PORTD |= (1 << PD6) | (1 << PD7); 
+	PORTB |= (1 << PB0) | (1 << PB2) | (1 << PB3) | (1 << PB4) | (1 << PB5);
+	
+	enviar_mensaje("Apreta 'F' para la cancion Feliz Cumple o 'M' para Mario Bross.\n");
+
+	while (1) {
+
+		if (!(PIND & (1 << PD6))) { 
+			reproducir_tono(NOTA_C4);
+			enviar_mensaje("Nota Do Presionada\n");
+			} else {
+			reproducir_tono(RESTA);
+		}
+
+		if (!(PIND & (1 << PD7))) { 
+			reproducir_tono(NOTA_D4);
+			enviar_mensaje("Nota Re Presionada\n");
+			} else {
+			reproducir_tono(RESTA); 
+		}
+
+		if (!(PINB & (1 << PB0))) { 
+			reproducir_tono(NOTA_E4);
+			enviar_mensaje("Nota Mi Presionada\n");
+			} else {
+			reproducir_tono(RESTA); 
+		}
+
+		if (!(PINB & (1 << PB2))) { 
+			reproducir_tono(NOTA_G4);
+			enviar_mensaje("Nota Sol Presionada\n");
+			} else {
+			reproducir_tono(RESTA); 
+		}
+
+		if (!(PINB & (1 << PB3))) { 
+			reproducir_tono(NOTA_A4);
+			enviar_mensaje("Nota La Presionada\n");
+			} else {
+			reproducir_tono(RESTA); 
+		}
+
+		if (!(PINB & (1 << PB4))) {
+			reproducir_tono(NOTA_AS4);
+			enviar_mensaje("Nota La# Presionada\n");
+			} else {
+			reproducir_tono(RESTA);
+		}
+
+		if (!(PINB & (1 << PB5))) { 
+			reproducir_tono(NOTA_C5);
+			enviar_mensaje("Nota Do# Presionada\n");
+			} else {
+			reproducir_tono(RESTA);
+		}
+
+	
+		if (UCSR0A & (1 << RXC0)) {
+			unsigned char comando = UDR0; 
+
+			if (comando == 'F') {
+				enviar_mensaje("Reproduciendo Feliz Cumpleaños...\n");
+				reproducir_feliz_cumple();
+				} else if (comando == 'M') {
+				enviar_mensaje("Reproduciendo Mario Bross...\n");
+				reproducir_mario();
+			}
+		}
+	}
+}
