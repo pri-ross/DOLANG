@@ -1,0 +1,628 @@
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+
+#define F_CPU 16000000UL
+
+#define CLK_X PB3        
+#define DIR_X PB4        
+#define EN_X PB5        
+
+#define SOLENOID PC0    
+#define CLK_Y PC3       
+#define DIR_Y PC4     
+#define EN_Y PC5        
+
+#define LIMIT_YA PD2    
+#define LIMIT_YD PD3     
+#define LED PD5          
+
+#define PASOS 200
+#define PASOS_2 120
+#define RADIO 30
+ 
+void Atras(){
+	PORTB |= (1 << DIR_X);
+	for (int i = 0; i < PASOS; i++) {  
+		PORTB |= (1 << CLK_X);      
+		_delay_us(1000);              
+
+		PORTB &= ~(1 << CLK_X);     
+		_delay_us(1000);              
+	}
+}
+
+void Adelante(){
+	PORTB &= ~(1 << DIR_X);
+	for (int i = 0; i < PASOS; i++) {  
+		PORTB |= (1 << CLK_X);      
+		_delay_us(1000);              
+
+		PORTB &= ~(1 << CLK_X);      
+		_delay_us(1000);              
+	}
+}
+
+void Derecha(){
+	PORTC |= (1 << DIR_Y);
+	for (int i = 0; i < PASOS; i++) { 
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(1000);              
+
+		PORTC &= ~(1 << CLK_Y);      
+		_delay_us(1000);        
+	}
+}
+
+void Izquierda(){
+	PORTC &= ~(1 << DIR_Y);
+	for (int i = 0; i < PASOS; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(1000);             
+
+		PORTC &= ~(1 << CLK_Y);      
+		_delay_us(1000);             
+	}
+}
+
+void diagonal_Der_Atr(){
+	PORTC |= (1 << DIR_Y);
+	PORTB |= (1 << DIR_X);
+	for (int i = 0; i < PASOS; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		PORTB |= (1 << CLK_X);      
+		_delay_us(1000);
+		
+		PORTC &= ~(1 << CLK_Y);
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(1000);
+
+	}
+}
+
+void diagonal_Der_Adl(){
+	PORTC |= (1 << DIR_Y);
+	PORTB &= ~(1 << DIR_X);
+	for (int i = 0; i < PASOS; i++) {
+		PORTC |= (1 << CLK_Y);
+		PORTB |= (1 << CLK_X);
+		_delay_us(1000);
+		
+		PORTC &= ~(1 << CLK_Y);
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(1000);
+
+	}
+}
+
+void diagonal_Izq_Atr(){
+	PORTB |= (1 << DIR_X);
+	PORTC &= ~(1 << DIR_Y);
+	for (int i = 0; i < PASOS; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		PORTB |= (1 << CLK_X);     
+		_delay_us(1000);
+		
+		PORTC &= ~(1 << CLK_Y);
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(1000);
+
+	}
+}
+
+void diagonal_Izq_Adl(){
+	PORTB &= ~(1 << DIR_X);
+	PORTC &= ~(1 << DIR_Y);
+	for (int i = 0; i < PASOS; i++) {
+		PORTC |= (1 << CLK_Y);
+		PORTB |= (1 << CLK_X);
+		_delay_us(1000);
+		
+		PORTC &= ~(1 << CLK_Y);
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(1000);
+
+	}
+}
+
+void Subir_Sol() { // Funcion para subir la punta del selenoide
+	PORTC |= (1 << SOLENOID);  
+	_delay_ms(500);            
+}
+
+void Bajar_Sol() { // Funcion para bajar la punta del selenoide
+	PORTC &= ~(1 << SOLENOID);  
+	_delay_ms(500);           
+}
+
+// Funciones hechas para mover mas rapido en estos sentidos
+void adelantePorDos (){
+
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+Adelante();
+
+}
+
+void atrasPorDos(){
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+}
+
+void cruz(){
+	diagonal_Der_Atr();
+	_delay_ms(500);
+	
+	Subir_Sol();
+	Adelante();
+
+	Bajar_Sol();
+	_delay_ms(500);
+	
+	diagonal_Izq_Atr();
+	
+	
+}
+
+void Triangulo(){
+	Izquierda();
+	Adelante();
+	diagonal_Der_Atr();
+	_delay_ms(500);
+}
+
+void cuadrante_Der_Atr() {
+	PORTB |= (1 << DIR_X);  
+	PORTC |= (1 << DIR_Y); 
+
+	for (int x = 0; x < RADIO; x++) {
+		int y = (int)(sqrt((RADIO * RADIO) - (x * x)));
+
+		for (int i = 0; i < x; i++) {
+			PORTB |= (1 << CLK_X);
+			_delay_us(1000);
+			PORTB &= ~(1 << CLK_X);
+			_delay_us(1000);
+		}
+
+		for (int j = 0; j < y; j++) {
+			PORTC |= (1 << CLK_Y);
+			_delay_us(1000);
+			PORTC &= ~(1 << CLK_Y);
+			_delay_us(1000);
+		}
+	}
+}
+
+void cuadrante_Izq_Atr() {
+	PORTC &= ~(1 << DIR_Y); 
+	PORTB|= (1 << DIR_X);  
+
+	for (int x = 0; x < RADIO; x++) {
+		int y = (int)(sqrt((RADIO * RADIO) - (x * x)));
+
+		for (int i = 0; i < x; i++) {
+			PORTC |= (1 << CLK_Y);
+			_delay_us(1000);
+			PORTC &= ~(1 << CLK_Y);
+			_delay_us(1000);
+		}
+
+		for (int j = 0; j < y; j++) {
+			PORTB |= (1 << CLK_X);
+			_delay_us(1000);
+			PORTB &= ~(1 << CLK_X);
+			_delay_us(1000);
+		}
+	}
+}
+
+void cuadrante_Izq_Adl() {
+	PORTB &= ~(1 << DIR_X);
+	PORTC &= ~(1 << DIR_Y); 
+
+	for (int x = 0; x < RADIO; x++) {
+		int y = (int)(sqrt((RADIO * RADIO) - (x * x)));
+
+		for (int i = 0; i < x; i++) {
+			PORTB |= (1 << CLK_X);
+			_delay_us(1000);
+			PORTB &= ~(1 << CLK_X);
+			_delay_us(1000);
+		}
+
+		for (int j = 0; j < y; j++) {
+			PORTC |= (1 << CLK_Y);
+			_delay_us(1000);
+			PORTC &= ~(1 << CLK_Y);
+			_delay_us(1000);
+		}
+	}
+}
+
+void cuadrante_Der_Adl() {
+	PORTB &= ~(1 << DIR_X);  
+	PORTC |= (1 << DIR_Y); 
+
+	for (int x = 0; x < RADIO; x++) {
+		int y = (int)(sqrt((RADIO * RADIO) - (x * x)));
+
+		for (int i = 0; i < x; i++) {
+			PORTC |= (1 << CLK_Y);
+			_delay_us(1000);
+			PORTC &= ~(1 << CLK_Y);
+			_delay_us(1000);
+		}
+
+		for (int j = 0; j < y; j++) {
+			PORTB |= (1 << CLK_X);
+			_delay_us(1000);
+			PORTB &= ~(1 << CLK_X);
+			_delay_us(1000);
+		}
+	}
+}
+
+void circunferencia() {
+	cuadrante_Der_Atr();
+	cuadrante_Izq_Atr();
+	cuadrante_Izq_Adl();
+	cuadrante_Der_Adl();
+}
+
+void Conejo(){
+	//OREJAS
+	cuadrante_Izq_Adl();
+	cuadrante_Der_Atr();
+	
+	cuadrante_Der_Adl();
+	cuadrante_Izq_Atr();
+	//CABEZA
+	circunferencia();
+	//CARA
+	Subir_Sol();
+	Atras();
+	
+	Bajar_Sol();
+	Ojos();
+	
+	Subir_Sol();
+	Derecha();
+	Derecha();
+	
+	Bajar_Sol();
+	Ojos();
+	
+	//Bigotes
+	Subir_Sol();
+	Atras();
+	Atras();
+	
+	Bajar_Sol();
+	Derecha();
+	Derecha();
+	Derecha();
+	
+	Subir_Sol();
+	Atras();
+	
+	Bajar_Sol();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	
+	Subir_Sol();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	
+	Bajar_Sol();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	
+	Subir_Sol();
+	Adelante();
+	
+	Bajar_Sol();
+	Derecha();
+	Derecha();
+	Derecha();
+	
+	Subir_Sol();
+	Derecha();
+	// Alinear el solenoide mas al centro de la cara
+	PORTC |= (1 << DIR_Y);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(2000);              
+
+		PORTC &= ~(1 << CLK_Y);     
+		_delay_us(2000);              
+	}
+	
+	Bajar_Sol();
+	Crucesita();
+	
+}
+
+void Ojos(){
+	
+	//Derecha
+	PORTC |= (1 << DIR_Y);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(3000);             
+
+		PORTC &= ~(1 << CLK_Y);    
+		_delay_us(3000);              
+	}
+	
+	//Atrás pero mas corto
+	PORTB |= (1 << DIR_X);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTB |= (1 << CLK_X);      
+		_delay_us(2000);              
+
+		PORTB &= ~(1 << CLK_X);      
+		_delay_us(2000);             
+	}
+	
+	//Izquierda pero mas corto
+	PORTC &= ~(1 << DIR_Y);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(2000);           
+
+		PORTC &= ~(1 << CLK_Y);  
+		_delay_us(2000);            
+	}
+
+	//Adelante
+	PORTB &= ~(1 << DIR_X);
+	for (int i = 0; i < PASOS_2; i++) {
+		PORTB |= (1 << CLK_X);
+		_delay_us(2000);
+
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(2000);
+	}
+}
+
+void Crucesita(){
+	// diagonal_Der_Atr
+	PORTC |= (1 << DIR_Y);
+	PORTB |= (1 << DIR_X);
+	for (int i = 0; i < PASOS_2; i++) {
+		PORTC |= (1 << CLK_Y);
+		PORTB |= (1 << CLK_X);
+		_delay_us(2000);
+		
+		PORTC &= ~(1 << CLK_Y);
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(2000);
+
+	}
+	Subir_Sol();
+
+// Adelante
+	PORTB &= ~(1 << DIR_X);
+	for (int i = 0; i < PASOS_2; i++) {
+		PORTB |= (1 << CLK_X);
+		_delay_us(2000);
+
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(2000);
+	}
+
+	Bajar_Sol();
+
+// diagonal_Izq_Atr
+	PORTB |= (1 << DIR_X);
+	PORTC &= ~(1 << DIR_Y);
+	
+	for (int i = 0; i < PASOS_2; i++) {
+		PORTC |= (1 << CLK_Y);
+		PORTB |= (1 << CLK_X);
+		_delay_us(2000);
+	
+		PORTC &= ~(1 << CLK_Y);
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(2000);
+
+	}
+	
+}
+
+void CuboMini(){
+	//Izquierda
+	PORTC &= ~(1 << DIR_Y);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(3000);            
+
+		PORTC &= ~(1 << CLK_Y);     
+		_delay_us(3000);              
+	}
+	
+	//Atrás
+	PORTB |= (1 << DIR_X);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTB |= (1 << CLK_X);   
+		_delay_us(2000);             
+
+		PORTB &= ~(1 << CLK_X);    
+		_delay_us(2000);             
+	}
+	
+	//Derecha
+	PORTC |= (1 << DIR_Y);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTC |= (1 << CLK_Y);      
+		_delay_us(2000);           
+
+		PORTC &= ~(1 << CLK_Y);    
+		_delay_us(2000);            
+	}
+	
+	//Adelante
+	PORTB &= ~(1 << DIR_X);
+	for (int i = 0; i < PASOS_2; i++) {
+		PORTB |= (1 << CLK_X);
+		_delay_us(2000);
+
+		PORTB &= ~(1 << CLK_X);
+		_delay_us(2000);
+	}
+	
+}
+
+void Raton(){
+	//OREJAS
+	Adelante();
+	cuadrante_Der_Adl();
+	cuadrante_Der_Atr();
+	Atras();
+	
+	cuadrante_Der_Adl();
+	cuadrante_Der_Atr();
+	Atras();
+	Atras();
+	
+	//CABEZA
+	diagonal_Izq_Atr();
+	diagonal_Izq_Atr();
+	diagonal_Izq_Atr();
+	diagonal_Izq_Atr();
+	diagonal_Izq_Atr();
+	diagonal_Izq_Atr();
+	//Nariz del raton
+	CuboMini();
+	_delay_ms(500);
+	//Alinear la proxima diagonal en el centro de la nariz
+	//Izquierda
+	PORTC &= ~(1 << DIR_Y);
+	for (int i = 0; i < PASOS_2; i++) {  
+		PORTC |= (1 << CLK_Y);       
+		_delay_us(2000);              
+
+		PORTC &= ~(1 << CLK_Y);     
+		_delay_us(2000);              
+	}
+
+	diagonal_Izq_Adl();
+	diagonal_Izq_Adl();
+	diagonal_Izq_Adl();
+	diagonal_Izq_Adl();
+	diagonal_Izq_Adl();
+	
+	Subir_Sol();
+	Derecha();
+	Derecha();
+	Derecha();
+	Adelante();
+	
+	Bajar_Sol();
+	_delay_ms(500);
+	Ojos();
+	
+	Subir_Sol();
+	Derecha();
+	Derecha();
+	Derecha();
+	Derecha();
+	
+	Bajar_Sol();
+	_delay_ms(500);
+	Ojos();
+	
+	Subir_Sol(); 
+	Atras();
+	Atras();
+	Atras();
+	Atras();
+	
+	//Bigotes
+	Bajar_Sol();
+	Derecha();
+	Derecha();
+	Derecha();
+	
+	Subir_Sol();
+	Atras();
+	
+	Bajar_Sol();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	
+	Subir_Sol();
+	Izquierda();
+	
+	Bajar_Sol();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	Izquierda();
+	
+	Subir_Sol();
+	Adelante();
+	
+	Bajar_Sol();
+	Derecha();
+	Derecha();
+	Derecha();
+}
+
+ISR(INT0_vect) {
+	while (1) {
+	}
+	EIFR |= (1 << INTF0); 
+}
+
+ISR(INT1_vect) {
+	while (1) {
+	}
+	EIFR |= (1 << INTF1);  
+}
+
+int main() {
+	DDRD &= ~((1 << LIMIT_YA) | (1 << LIMIT_YD));  
+	PORTD |= (1 << LIMIT_YA) | (1 << LIMIT_YD);   
+
+	DDRC |= (1 << CLK_Y) | (1 << EN_Y) | (1 << DIR_Y);
+	DDRB |= (1 << CLK_X) | (1 << EN_X) | (1 << DIR_X);
+	PORTC |= (1 << EN_Y);
+	PORTB |= (1 << EN_X);
+
+	EICRA |= (1 << ISC01) | (1 << ISC11);  
+	EICRA &= ~((1 << ISC00) | (1 << ISC10)); 
+
+	EIFR |= (1 << INTF1) | (1 << INTF0);
+	EIMSK |= (1 << INT0) | (1 << INT1);
+	sei();
+
+	Subir_Sol();
+	Atras();
+	Atras();
+	
+
+	while (1) {
+	}
+}
