@@ -1,67 +1,201 @@
+#define F_CPU    16000000UL
+#define PCF8574  0x27
+
+#include <xc.h>
 #include <avr/io.h>
-#include <avr/eeprom.h>
+#include <util/twi.h>
 #include <util/delay.h>
+#include <string.h>
+#include "twi_lcd.h"
 
-#define LED_VERDE PORTB0
-#define LED_ROJO PORTB1
-#define BUZZER PORTD2
+char keypad[3][3] = {
+	{'1', '2', '3'},
+	{'4', '5', '6'},
+	{'7', '8', '9'}
+};
 
-uint8_t intentos = 0;
-uint8_t EEMEM contraseña[6] = {1, 2, 3, 4}; 
-void inicializar_puertos() {
-	DDRB |= (1 << LED_VERDE) | (1 << LED_ROJO); 
-	DDRD |= (1 << BUZZER); 
+#define GREEN_LED_PIN   PD3
+#define RED_LED_PIN     PD2
+#define BUZZER_PIN      PB3
+
+#define EEPROM_ADDR 0
+
+char password[6] = "1234";
+char input[6];
+char new_password[6];
+uint8_t attempt_count = 0;
+uint8_t input_len = 0;
+uint8_t change_mode = 0;
+
+void UART_init(uint16_t ubrr) {
+	UBRR0H = (unsigned char)(ubrr >> 8);
+	UBRR0L = (unsigned char)ubrr;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
-void mostrar_estado(int correcto) {
-	if (correcto) {
-		PORTB |= (1 << LED_VERDE);
-		PORTB &= ~(1 << LED_ROJO);
-		} else {
-		PORTB |= (1 << LED_ROJO);
-		PORTB &= ~(1 << LED_VERDE);
-	}
+void UART_sendChar(char c) {
+	while (!(UCSR0A & (1 << UDRE0)));
+	UDR0 = c;
 }
 
-void leer_contraseña(uint8_t *buffer, uint8_t longitud) {
-	eeprom_read_block((void*)buffer, (const void*)contraseña, longitud);
+void keypad_init() {
+	DDRB |= 0x07;
+	DDRD &= ~(0xE0);
+	PORTD |= 0xE0;
 }
 
-int verificar_contraseña(uint8_t *ingresada, uint8_t longitud) {
-	uint8_t almacenada[6];
-	leer_contraseña(almacenada, longitud);
-	for (uint8_t i = 0; i < longitud; i++) {
-		if (ingresada[i] != almacenada[i]) {
-			return 0;
+char read_keypad(void) {
+	for (int8_t row = 2; row >= 0; row--) {
+		PORTB = ~(1 << row);
+		for (uint8_t col = 0; col < 3; col++) {
+			if (!(PIND & (1 << (col + 5)))) {
+				_delay_ms(50);
+				while (!(PIND & (1 << (col + 5))));
+				return keypad[row][col];
+			}
 		}
 	}
-	return 1;
+	return 0;
 }
 
-int ingresar_contraseña() {
-	uint8_t ingresada[6] = {1, 2, 3, 4}; 
-	if (verificar_contraseña(ingresada, 4)) {
-		mostrar_estado(1);
-		intentos = 0;
-		return 1;
-		} else {
-		intentos++;
-		mostrar_estado(0);
-		if (intentos >= 3) {
-			PORTD |= (1 << BUZZER); 
-			_delay_ms(1000);
-			PORTD &= ~(1 << BUZZER);
+void check_password() {
+	if (strcmp(input, password) == 0) {
+		twi_lcd_clear();
+		twi_lcd_msg(" correcta");
+		PORTD |= (1 << GREEN_LED_PIN);
+		_delay_ms(2000);
+		PORTD &= ~(1 << GREEN_LED_PIN);
+		twi_lcd_clear();
+		attempt_count = 0;
+		twi_lcd_msg("_ cambiar clave?");
+		twi_lcd_cmd(0xC0);
+		twi_lcd_msg(" 1:SI, 2:NO ");
+		change_mode = 1;
+	} else {
+		twi_lcd_clear();
+		twi_lcd_msg("__ clave_incorrecta");
+		PORTD |= (1 << RED_LED_PIN);
+		_delay_ms(2000);
+		PORTD &= ~(1 << RED_LED_PIN);
+		twi_lcd_clear();
+		attempt_count++;
+
+		if (attempt_count >= 3) {
+			twi_lcd_clear();
+			twi_lcd_msg("__ Alarma activada");
+
+			for (int i = 0; i < 1; i++) {
+				generateSinusoidalTone();
+				_delay_ms(200);
+			}
+
+			_delay_ms(3000);
+			PORTB &= ~(1 << BUZZER_PIN);
+			twi_lcd_clear();
+			attempt_count = 0;
 		}
-		return 0;
+	}
+	input_len = 0;
+	memset(input, 0, sizeof(input));
+}
+
+void confirm_new_password() {
+	if (strcmp(input, new_password) == 0) {
+		strcpy(password, new_password);
+		twi_lcd_clear();
+		twi_lcd_msg("clave_actualizada");
+		twi_lcd_msg("__  actualizada!");
+		_delay_ms(2000);
+		twi_lcd_clear();
+	} else {
+		twi_lcd_clear();
+		twi_lcd_msg("__ no coinciden");
+		_delay_ms(2000);
+		twi_lcd_clear();
+	}
+	change_mode = 0;
+	input_len = 0;
+}
+
+void generateTone(uint16_t frequency) {
+	if (frequency > 0) {
+		uint16_t delayPeriod = 1000000 / frequency;
+		for (uint16_t i = 0; i < 100; i++) {
+			PORTB |= (1 << BUZZER_PIN);
+			for (uint16_t j = 0; j < (delayPeriod / 2); j++) {
+				_delay_us(1);
+			}
+			PORTB &= ~(1 << BUZZER_PIN);
+			for (uint16_t j = 0; j < (delayPeriod / 2); j++) {
+				_delay_us(1);
+			}
+		}
+	}
+}
+
+void generateSinusoidalTone(void) {
+	float sinVal;
+	int toneVal;
+
+	for (int x = 0; x < 180; x++) {
+		sinVal = sin(x * (M_PI / 180.0));
+		toneVal = 2000 + (int)(sinVal * 1000);
+		generateTone(toneVal);
+		_delay_ms(2);
 	}
 }
 
 int main(void) {
-	inicializar_puertos();
-	
+	twi_init();
+	twi_lcd_init();
+	twi_lcd_cmd(0x80);
+	twi_lcd_clear();
+	keypad_init();
+	UART_init(103);
+
+	DDRD |= (1 << GREEN_LED_PIN) | (1 << RED_LED_PIN);
+	DDRB |= (1 << BUZZER_PIN);
+	PORTB &= ~(1 << BUZZER_PIN);
+
+	char key;
+
 	while (1) {
-		if (ingresar_contraseña()) {
-			_delay_ms(2000); 
+		key = read_keypad();
+
+		if (key) {
+			if (change_mode == 1 && key == '1') {
+				twi_lcd_clear();
+				twi_lcd_msg(" Cambiar clave");
+				_delay_ms(2000);
+				twi_lcd_clear();
+				change_mode = 2;
+				input_len = 0;
+			} else if (change_mode == 1 && key == '2') {
+				change_mode = 0;
+				twi_lcd_clear();
+			} else if (input_len < 4) {
+				input[input_len++] = key;
+				twi_lcd_dwr('*');
+				UART_sendChar(key);
+				UART_sendChar('\n');
+			}
+
+			if (input_len == 4) {
+				if (change_mode == 0) {
+					check_password();
+				} else if (change_mode == 3) {
+					confirm_new_password();
+				} else if (change_mode == 2) {
+					strcpy(new_password, input);
+					twi_lcd_clear();
+					twi_lcd_msg(" Confirme clave:");
+					input_len = 0;
+					change_mode = 3;
+				}
+				_delay_ms(500);
+			}
+			_delay_ms(200);
 		}
 	}
 }
