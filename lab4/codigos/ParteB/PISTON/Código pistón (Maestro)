@@ -1,0 +1,123 @@
+#define F_CPU 16000000UL
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+
+#define BAUD 9600
+#define MY_UBRR F_CPU/16/BAUD-1
+#define tiempo 24
+
+#define TX_PIN PB0
+#define RX_PIN PB1
+
+void initSerial() {
+	DDRB |= (1 << TX_PIN);
+	DDRB &= ~(1 << RX_PIN);
+}
+
+void USART_Init() {
+	UBRR0H = ((MY_UBRR) >> 8);
+	UBRR0L = MY_UBRR;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+
+}
+
+void USART_Transmit(unsigned char data) {
+	while (!(UCSR0A & (1 << UDRE0)));
+	UDR0 = data;
+}
+
+unsigned char USART_Receive(void) {
+	while (!(UCSR0A & (1 << RXC0)));
+	return UDR0;
+}
+
+void sendByteGPIO(uint8_t data) { //enviar un byte a través de PB0(tx)
+	PORTB &= ~(1 << TX_PIN);
+	_delay_us(105);
+	
+	for(int i = 0; i < 8; i++) {
+		if (data & (1 << i)) {
+			PORTB |= (1 << TX_PIN);
+			} else {
+			PORTB &= ~(1 << TX_PIN);
+		}
+		_delay_us(105);
+	}
+
+	PORTB |= (1 << TX_PIN);
+	_delay_us(105);
+}
+
+uint8_t receiveByteGPIO() {
+	uint8_t data = 0;
+	
+	while (PINB & (1 << RX_PIN));
+	
+	_delay_us(105);
+
+	for(int i = 0; i < 8; i++) {
+		if (PINB & (1 << RX_PIN)) {
+			data |= (1 << i);
+		}
+		_delay_us(105);
+	}
+
+	while (!(PINB & (1 << RX_PIN)));
+
+	return data;
+}
+
+int main() {
+	initSerial();
+	USART_Init();
+
+	// Configurar pines de entrada y salida para botones y LEDs
+	DDRD &= ~((1 << PD2) | (1 << PD3) | (1 << PD4)); // Botones de parada
+	PORTD |= (1 << PD2) | (1 << PD3) | (1 << PD4);
+
+	DDRD |= (1 << PD5) | (1 << PD6) | (1 << PD7); // LEDs
+	PORTD &= ~((1 << PD5) | (1 << PD6) | (1 << PD7));
+
+	DDRB &= ~((1 << PB2) | (1 << PB3)); // Botones de giro
+	PORTB |= ((1 << PB2) | (1 << PB3));
+
+	DDRB |= (1 << TX_PIN);  // TX_PIN como salida
+	DDRB &= ~(1 << RX_PIN); // RX_PIN como entrada
+	
+	EICRA |= (1 << ISC01) | (1 << ISC11) | (1 << ISC00) | (1 << ISC10);
+	EIMSK |= (1 << INT0) | (1 << INT1);
+	sei();
+
+	while (1) {
+		// Control manual basado en los botones
+		if (!(PINB & (1 << PB2)) && (PINB & (1 << PB3))) {
+			USART_Transmit('1');
+			sendByteGPIO('1');
+			_delay_ms(50);
+			asm("jmp main");
+			} else if ((PINB & (1 << PB2)) && !(PINB & (1 << PB3))) {
+			USART_Transmit('2');
+			sendByteGPIO('2');
+			_delay_ms(50);
+			asm("jmp main");
+			} else if (!(PINB & (1 << PB2)) && !(PINB & (1 << PB3))) {
+			USART_Transmit('3');
+			sendByteGPIO('3');
+			_delay_ms(50);
+			asm("jmp main");
+			} else if (!(PIND & (1 << PD2))) {
+			USART_Transmit('3');
+			sendByteGPIO('3');
+			_delay_ms(50);
+			asm("jmp main");
+			} else if (!(PIND & (1 << PD3))) {
+			USART_Transmit('4');
+			sendByteGPIO('4');
+			_delay_ms(50);
+			asm("jmp main");
+		}
+	}
+	return 0;
+}
