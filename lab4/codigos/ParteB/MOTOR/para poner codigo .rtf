@@ -1,1 +1,203 @@
-{\rtf1}
+ #define F_CPU 16000000UL
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+
+#define BAUD 38400
+#define MY_UBRR F_CPU/16/BAUD-1
+#define tiempo 24
+
+#define TX_PIN PB0
+#define RX_PIN PB1
+
+void USART_Init() {
+	UBRR0H = (MY_UBRR >> 8);
+	UBRR0L = MY_UBRR;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+
+}
+
+void char_to_str(char c, char *str) {
+	str[0] = c; 
+	str[1] = '\0'; }
+
+void USART_Transmit(unsigned char data) {
+	char buffer[2]; 
+	char_to_str(data, buffer);
+	
+	for (int i = 0; buffer[i] != '\0'; i++) {
+		while (!(UCSR0A & (1 << UDRE0))); 
+		UDR0 = buffer[i];
+	}
+}
+
+void USART_sendString(const char *str) {
+	while (*str) {
+		USART_Transmit(*str++);
+	}
+}
+
+unsigned char USART_Receive(void) {
+	while (!(UCSR0A & (1 << RXC0)));
+	return UDR0;
+}
+
+void sendByteGPIO(uint8_t data) { 
+	PORTB &= ~(1 << TX_PIN);
+	_delay_us(tiempo);
+	
+	for(int i = 0; i < 8; i++) {
+		if (data & (1 << i)) {
+			PORTB |= (1 << TX_PIN);
+			} else {
+			PORTB &= ~(1 << TX_PIN);
+		}
+		_delay_us(tiempo);
+	}
+
+	PORTB |= (1 << TX_PIN);
+	_delay_us(tiempo);
+}
+
+uint8_t receiveByteGPIO() {
+	uint8_t data = 0;
+	
+	while (PINB & (1 << RX_PIN));
+	
+	_delay_us(tiempo);
+
+	for(int i = 0; i < 8; i++) {
+		if (PINB & (1 << RX_PIN)) {
+			data |= (1 << i);
+		}
+		_delay_us(tiempo);
+	}
+
+	while (!(PINB & (1 << RX_PIN)));
+
+	return data;
+}
+
+ISR(INT0_vect) {
+	while ((PIND & (1 << PD4))) {
+		PORTD &= ~((1 << PD6) | (1 << PD7));
+		PORTD |= (1 << PD5);
+		PORTB &= ~((1 << PB2) | (1 << PB3));
+	}
+	EIFR |= (1 << INTF0);
+	asm("jmp main");
+}
+
+ISR(INT1_vect) {
+	while ((PIND & (1 << PD3))) {
+		PORTD &= ~((1 << PD6) | (1 << PD7));
+		PORTD |= (1 << PD5);
+		PORTB &= ~((1 << PB2) | (1 << PB3));
+	}
+	while (!(PIND & (1 << PD3)));
+	EIFR |= (1 << INTF1);
+	asm("jmp main");
+
+}
+
+int main() {
+	USART_Init(); 
+	USART_Transmit('S'); // Enviar un caracter de prueba
+	USART_Transmit('\n');
+
+	DDRD &= ~((1 << PD2) | (1 << PD3) | (1 << PD4)); //Botones 
+	PORTD |= (1 << PD2) | (1 << PD3) | (1 << PD4); 
+
+	DDRD |= (1 << PD5) | (1 << PD6) | (1 << PD7); //Leds que simulan la respuesta del esclavo
+	PORTD &= ~((1 << PD5) | (1 << PD6) | (1 << PD7));
+
+	DDRB &= ~((1 << PB2) | (1 << PB3)); //Botones de giro
+	PORTB |= ((1 << PB2) | (1 << PB3));
+	
+	DDRB |= (1 << TX_PIN);  
+	DDRB &= ~(1 << RX_PIN); 
+	
+	EICRA |= (1 << ISC01) | (1 << ISC11) | (1 << ISC00) | (1 << ISC10);
+	EIMSK |= (1 << INT0) | (1 << INT1);
+	sei(); 
+
+	while (1) {
+
+		if (!(PINB & (1 << PB2)) && (PINB & (1 << PB3))) {
+			PORTD |= (1 << PD6);
+			PORTD &= ~(1 << PD5);
+			USART_Transmit('H'); 
+			USART_Transmit('\n');
+			_delay_ms(500);
+			
+			} else if ((PINB & (1 << PB2)) && !(PINB & (1 << PB3))) {
+			PORTD |= (1 << PD7);
+			PORTD &= ~(1 << PD5);
+			USART_Transmit('A'); 
+			USART_Transmit('\n');
+			_delay_ms(500);
+			
+			} else if (!(PINB & (1 << PB2)) && !(PINB & (1 << PB3))) {
+			PORTD &= ~((1 << PD6) | (1 << PD7));
+			PORTD |= (1 << PD5);
+			USART_Transmit('D'); 
+			USART_Transmit('\n');
+				
+			} else {
+			USART_Transmit('D'); // Notificar que el motor está detenido
+			USART_Transmit('\n');
+			PORTD &= ~((1 << PD6) | (1 << PD7));
+			PORTD &= ~(1 << PD5);
+		}
+
+		// Control mediante comandos UART
+		/*if (UCSR0A & (1 << RXC0)) {
+			unsigned char command = USART_Receive();
+			switch (command) {
+				case '1':
+				PORTB |= (1 << PB0);
+				sendByteGPIO('H'); 
+				_delay_ms(500);
+				PORTB &= ~(1 << PB0);
+				break;
+
+				case '2':
+				PORTB |= (1 << PB1);
+				sendByteGPIO('A');
+				_delay_ms(500);
+				PORTB &= ~(1 << PB1);
+				break;
+
+				case 'S':
+				PORTB &= ~((1 << PB0) | (1 << PB1));
+				sendByteGPIO('D'); 
+				break;
+
+				case 'X':
+				sendByteGPIO('E'); 
+				PORTB &= ~((1 << PB0) | (1 << PB1));
+				do {
+					command = USART_Receive();
+				} while (command != 'Y');
+				sendByteGPIO('R'); 
+				break;
+
+				case 'A':
+				sendByteGPIO('M'); 
+				PORTB |= (1 << PB0);
+				_delay_ms(500);
+				PORTB &= ~(1 << PB0);
+				PORTB |= (1 << PB1);
+				_delay_ms(500);
+				PORTB &= ~(1 << PB1);
+				break;
+
+				default:
+				sendByteGPIO('U');
+				break;
+			
+			}*/
+	}
+	return 0;
+}
