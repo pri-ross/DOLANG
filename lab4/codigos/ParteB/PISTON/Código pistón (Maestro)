@@ -93,13 +93,13 @@ int main() {
 	while (1) {
 		// Control manual basado en los botones
 		if (!(PINB & (1 << PB2)) && (PINB & (1 << PB3))) {
-			USART_Transmit('1');
-			sendByteGPIO('1');
+			USART_Transmit('5');
+			sendByteGPIO('5');
 			_delay_ms(50);
 			asm("jmp main");
 			} else if ((PINB & (1 << PB2)) && !(PINB & (1 << PB3))) {
-			USART_Transmit('2');
-			sendByteGPIO('2');
+			USART_Transmit('A');
+			sendByteGPIO('A');
 			_delay_ms(50);
 			asm("jmp main");
 			} else if (!(PINB & (1 << PB2)) && !(PINB & (1 << PB3))) {
@@ -113,11 +113,11 @@ int main() {
 			_delay_ms(50);
 			asm("jmp main");
 			} else if (!(PIND & (1 << PD3))) {
-			USART_Transmit('4');
-			sendByteGPIO('4');
+			USART_Transmit('9');
+			sendByteGPIO('9');
 			_delay_ms(50);
 			asm("jmp main");
 		}
 	}
 	return 0;
-}
+			}
