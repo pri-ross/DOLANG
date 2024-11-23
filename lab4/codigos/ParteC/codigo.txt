@@ -1,1 +1,103 @@
-escribir aqui 
+#define F_CPU 16000000UL
+#include <avr/io.h>
+#include <util/delay.h>
+
+#define MOTOR1_IN1 PD6
+#define MOTOR1_IN2 PB1
+#define MOTOR2_IN1 PB2
+#define MOTOR2_IN2 PB3
+
+void setup() {
+	DDRD |= (1 << MOTOR1_IN1);
+	DDRB |= (1 << MOTOR1_IN2) | (1 << MOTOR2_IN1) | (1 << MOTOR2_IN2);
+	
+	UBRR0H = 0;
+	UBRR0L = 103;
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+}
+
+void UART_Transmitir(char dato) {
+	while (!(UCSR0A & (1 << UDRE0)));
+	UDR0 = dato;
+}
+
+char UART_Recibir() {
+	while (!(UCSR0A & (1 << RXC0)));
+	return UDR0;
+}
+
+void avanzar() {
+	PORTD |= (1 << MOTOR1_IN1);
+	PORTB &= ~(1 << MOTOR1_IN2);
+
+	PORTB |= (1 << MOTOR2_IN1);
+	PORTB &= ~(1 << MOTOR2_IN2);
+}
+
+void retroceder() {
+	PORTD &= ~(1 << MOTOR1_IN1);
+	PORTB |= (1 << MOTOR1_IN2);
+
+	PORTB &= ~(1 << MOTOR2_IN2);
+	PORTB |= (1 << MOTOR2_IN1);
+}
+
+void detenerMotores() {
+	PORTD &= ~(1 << MOTOR1_IN1);
+	PORTB &= ~(1 << MOTOR1_IN2);
+	PORTB &= ~(1 << MOTOR2_IN1);
+	PORTB &= ~(1 << MOTOR2_IN2);
+}
+
+void girarIzquierda() {
+	PORTD &= ~(1 << MOTOR1_IN1);
+	PORTB |= (1 << MOTOR1_IN2);
+
+	PORTB |= (1 << MOTOR2_IN1);
+	PORTB &= ~(1 << MOTOR2_IN2);
+}
+
+void girarDerecha() {
+	PORTD |= (1 << MOTOR1_IN1);
+	PORTB &= ~(1 << MOTOR1_IN2);
+
+	PORTB &= ~(1 << MOTOR2_IN1);
+	PORTB |= (1 << MOTOR2_IN2);
+}
+
+int main() {
+	setup();
+	
+	while (1) {
+		char comando = UART_Recibir();
+
+		switch (comando) {
+			case 'W':
+			avanzar();
+			UART_Transmitir('W');
+			break;
+			case 'A':
+			girarIzquierda();
+			UART_Transmitir('A');
+			break;
+			case 'S':
+			retroceder();
+			UART_Transmitir('S');
+			break;
+			case 'D':
+			girarDerecha();
+			UART_Transmitir('D');
+			break;
+			case 'O':
+			detenerMotores();
+			UART_Transmitir('O');
+			break;
+			default:
+			UART_Transmitir('U');
+			break;
+		}
+	}
+	return 0;
+}
+
