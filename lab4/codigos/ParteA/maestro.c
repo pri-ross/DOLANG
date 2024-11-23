@@ -12,9 +12,9 @@
 #define MOSI 3
 #define MISO 4
 #define SCLK 5
-#define BUTTON_LED PB0   // Botón para el LED conectado a PB0
-#define BUTTON_MOTOR PB1 // Botón para el motor conectado a PB1
-#define BUTTON_BUZZER PD2 // Botón para el buzzer conectado a PD2
+#define BUTTON_LED PB0  
+#define BUTTON_MOTOR PB1 
+#define BUTTON_BUZZER PD2 
 
 
 #define DHT_PIN PC0
@@ -111,11 +111,11 @@ uint8_t DHT_read() {
 void read_DHT_data() {
 	DHT_start();
 	if (DHT_response()) {
-		humidity_int = DHT_read();      // Parte entera de la humedad
-		DHT_read();                     // Parte decimal de la humedad (ignorada)
-		temperature_int = DHT_read();   // Parte entera de la temperatura
-		DHT_read();                     // Parte decimal de la temperatura (ignorada)
-		DHT_read();                     // Checksum (ignoramos en este caso)
+		humidity_int = DHT_read();      
+		DHT_read();                    
+		temperature_int = DHT_read();   
+		DHT_read();                     
+		DHT_read();                    
 	}
 }
 
@@ -130,7 +130,6 @@ int main() {
 	SPI_MasterInit();
 	_delay_ms(10);
 
-	// Configurar botones
 	DDRB &= ~((1 << BUTTON_LED) | (1 << BUTTON_MOTOR)); // Configura PB0 y PB1 como entradas
 	PORTB |= (1 << BUTTON_LED) | (1 << BUTTON_MOTOR);  // Habilita pull-up en PB0 y PB1
 
@@ -150,20 +149,19 @@ int main() {
 		read_DHT_data(); // Leer datos de humedad y temperatura del DHT11
 		
 		// Mostrar humedad en la primera línea
-		twi_lcd_cmd(0x80);    // Ir a la primera línea
+		twi_lcd_cmd(0x80);   
 		twi_lcd_msg("Humedad: ");
 		int_to_str(humidity_int, buffer); // Convertir humedad a cadena
 		twi_lcd_msg(buffer);
-		twi_lcd_msg("%");     // Añadir el símbolo de porcentaje
-		
-		// Mostrar temperatura en la segunda línea
-		twi_lcd_cmd(0xC0);    // Ir a la segunda línea
+		twi_lcd_msg("%");     
+	
+		twi_lcd_cmd(0xC0);    
 		twi_lcd_msg("Temp: ");
 		int_to_str(temperature_int, buffer); // Convertir temperatura a cadena
 		twi_lcd_msg(buffer);
-		twi_lcd_msg("C");     // Añadir el símbolo de grados Celsius
+		twi_lcd_msg("C");    
 		
-		_delay_ms(2000); // Espera antes de actualizar de nuevo
+		_delay_ms(2000); 
 
 	while (1) {
 		// Control del LED
