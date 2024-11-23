@@ -8,8 +8,8 @@ spi_esclavo___spi
 #define MISO 4
 #define SCLK 5
 #define LED PD7     // LED conectado a PD7
-#define MOTOR PD3   // Servo conectado a PD6
-#define BUZZER PD6  // Buzzer conectado a PD5
+#define MOTOR PD3   // MOTOR conectado a PD3
+#define BUZZER PD6  // BUZZER conectado a PD6
 
 void SPI_SlaveInit();
 uint8_t SPI_SlaveReceive();
