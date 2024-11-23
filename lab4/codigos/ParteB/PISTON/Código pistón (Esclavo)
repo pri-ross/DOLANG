@@ -1,6 +1,8 @@
 #define F_CPU 16000000UL
+
 #include <avr/io.h>
 #include <util/delay.h>
+
 #define BAUD 9600
 #define MY_UBRR F_CPU/16/BAUD-1
 
@@ -46,6 +48,7 @@ void sendByteGPIO(uint8_t data) { //enviar un byte a través de PB0(tx)
 	PORTB |= (1 << TX_PIN);
 	_delay_us(105);
 }
+
 uint8_t receiveByteGPIO() {
 	uint8_t data = 0;
 	
@@ -99,20 +102,29 @@ void automaticSequence() {
 	_delay_ms(4000); // Esperar 1 segundo (ajustable)
 
 	// Activar pistón 2 (etiquetadora)
-	activateRelay(RELAY_2);
-	_delay_ms(4000);
-
-	// Activar sistema de vacío
 	activateRelay(RELAY_3);
 	_delay_ms(4000);
 
+	// Activar sistema de vacío
+	activateRelay(RELAY_2);
+	_delay_ms(4000);
+
+	deactivateRelay(RELAY_3);
+	_delay_ms(4000);
+	// 	// Mantener el sistema activo por 30 segundos
+	// 	_delay_ms(8000);
+
+	deactivateRelay(RELAY_1);
+	_delay_ms(4000);
+	// Desactivar relés en orden inverso
+	
+	activateRelay(RELAY_3);
+	_delay_ms(4000);
+	
 	deactivateRelay(RELAY_2);
 	_delay_ms(4000);
-// 	// Mantener el sistema activo por 30 segundos
-// 	_delay_ms(8000);
-
-	// Desactivar relés en orden inverso
-	deactivateRelay(RELAY_1);
+	
+	deactivateRelay(RELAY_3);
 	_delay_ms(4000);
 	
 	activateRelay(RELAY_2);
@@ -122,7 +134,7 @@ void automaticSequence() {
 	_delay_ms(4000);
 	
 	deactivateRelay(RELAY_2);
-	_delay_ms(4000);	
+	_delay_ms(4000);
 	
 }
 
@@ -151,7 +163,7 @@ void manualControl() {
 int main() {
 	USART_Init();
 	initSerial();
-	initRelays();   // Inicializar relés	
+	initRelays();   // Inicializar relés
 	DDRD |= (1 << PD5) | (1 << PD6) | (1 << PD7);
 	PORTD &= ~((1 << PD5) | (1 << PD6) | (1 << PD7));
 
@@ -162,28 +174,30 @@ int main() {
 			_delay_us(100);
 
 			// Controlar los LEDs en función del comando recibido con if-else
-			if (command == '1') {
+			if (command == '5') {
 				PORTD |= (1 << PD6);   // Enciende el LED en PD6
 				PORTD &= ~((1 << PD5) | (1 << PD7)); // Apaga los demás
-				_delay_ms(1000);
-				asm("jmp main");
-				} else if (command == '2') {
-				PORTD |= (1 << PD7);   // Enciende el LED en PD7
-				PORTD &= ~((1 << PD5) | (1 << PD6)); // Apaga los demás
-				_delay_ms(1000);
+				_delay_ms(3000);
+				PORTD &= ~(1<<PD6);
 				asm("jmp main");
 				} else if (command == '3') {
+				PORTD |= (1 << PD7);   // Enciende el LED en PD7
+				PORTD &= ~((1 << PD5) | (1 << PD6)); // Apaga los demás
+				_delay_ms(3000);
+				asm("jmp main");
+				} else if (command == 'A') {
 				PORTD &= ~((1 << PD6) | (1 << PD7)); // Apaga PD6 y PD7
 				PORTD |= (1 << PD5);    // Enciende PD5
-				_delay_ms(1000);
+				_delay_ms(3000);
 				asm("jmp main");
-				}else if(command == '4'){
-				automaticSequence();	
-				_delay_ms(1000);			
+				}else if(command == '9'){
+				automaticSequence();
+				_delay_ms(3000);
 				} else {
 				PORTD &= ~((1 << PD5) | (1 << PD6) | (1 << PD7)); // Apaga todos los LEDs
-			}
-		}
+				}
+			
+}
 	}
 
 	return 0;
